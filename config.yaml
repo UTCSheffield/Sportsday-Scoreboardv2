@@ -1,0 +1,114 @@
+version: 1
+genders: ["boys", "girls", "mixed"]
+
+years:
+  - id: y9
+    name: Year 9
+  - id: y10
+    name: Year 10
+  - id: y11
+    name: Year 11
+
+forms:
+  - id: s
+    name: Sharman
+  - id: w
+    name: Winston
+  - id: e
+    name: Ennis
+  - id: t
+    name: Turing
+
+events:
+  - id: 60m
+    name: 60m
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: 200m
+    name: 200m
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: 400m
+    name: 400m
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: 800m
+    name: 800m
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: javelin
+    name: Javelin
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: shot_putt
+    name: Shot Putt
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: high_jump
+    name: High Jump
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: long_jump
+    name: Long Jump
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: exclude
+      ids: ["mixed"]
+  - id: relay
+    name: 4X50 Relay
+    applicable_years:
+      type: all
+    applicable_forms:
+      type: all
+    applicable_genders:
+      type: include
+      ids: ["mixed"]
+scores:
+  - name: "1st"
+    value: 20
+  - name: "2nd"
+    value: 15
+  - name: "3rd"
+    value: 10
+  - name: "4th"
+    value: 5
+  - name: "Nothing"
+    value: 0

@@ -1,0 +1,14 @@
+[package]
+authors = ["Sean Outra <me@sean.cyou>"]
+edition = "2021"
+# If you change the name here, you must also do it in flake.nix (and run `cargo generate-lockfile` afterwards)
+name = "sportsday-scoreboard-v2"
+description = "A simple Rust project using Nix"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.3.14", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yml = "0.0.12"
