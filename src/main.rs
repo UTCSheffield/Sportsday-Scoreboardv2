@@ -98,6 +98,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::scoreboard::get)
             .service(routes::set_scores::post)
             .service(routes::set_scores::get)
+            .service(routes::results::get)
             .service(routes::ws::get)
     })
     .bind((host, port))?

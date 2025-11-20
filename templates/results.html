@@ -1,0 +1,31 @@
+{% extends "layouts/index.html" %}
+{% block content %}
+<table border=1>
+    <tr>
+        <th>Activity</th>
+        <th>Year</th>
+        <th>Group</th>
+        {% for form in forms %}
+        <th>{{ form.name }}</th>
+        {% endfor %}
+    </tr>
+    {% for event in events %}
+    <tr>
+        <td>
+            {{ event.name }}
+        </td>
+        <td>
+            {{ event.year }}
+        </td>
+        <td>
+            {{ event.group }}
+        </td>
+        {% for form in forms %}
+        <td style="background-color: {{ form.colour }};">
+            {{ event.scores[&form.id].to_string().replace("\"", "") }}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+{% endblock content %}

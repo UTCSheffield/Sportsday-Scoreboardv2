@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use crate::{
     configurator::parser::{Form, Score},
     db::{events::Events, years::Years},
+    routes::results::ResultsEvent,
 };
 
 #[derive(Template)]
@@ -33,4 +34,11 @@ pub struct SetScoresTemplate {
     pub events: Vec<Events>,
     pub forms: Vec<Form>,
     pub scores: Vec<Score>,
+}
+
+#[derive(Template)]
+#[template(path = "results.html")]
+pub struct ResultsTemplate {
+    pub forms: Vec<Form>,
+    pub events: Vec<ResultsEvent>,
 }
