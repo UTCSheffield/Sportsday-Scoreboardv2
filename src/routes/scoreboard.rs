@@ -1,12 +1,7 @@
 use actix_web::{get, web, HttpResponse};
 use askama::Template;
-use std::collections::HashMap;
 
-use crate::{
-    db::{events::Events, years::Years},
-    templates::ScoreboardTemplate,
-    utils, AppState,
-};
+use crate::{templates::ScoreboardTemplate, utils, AppState};
 
 #[get("/scoreboard")]
 pub async fn get(state: web::Data<AppState>) -> HttpResponse {

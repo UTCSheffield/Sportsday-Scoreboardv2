@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use actix_web::web;
 use askama::Template;
-use log::error;
 
 use crate::{
     db::{events::Events, years::Years},

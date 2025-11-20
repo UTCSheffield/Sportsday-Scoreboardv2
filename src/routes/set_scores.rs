@@ -1,4 +1,3 @@
-use actix::utils;
 use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
 use serde_json::Value;
