@@ -10,11 +10,21 @@ use crate::{
 };
 
 #[get("/set_scores")]
-pub async fn get(state: web::Data<AppState>) -> HttpResponse {
-    let events = Events::all(&state.pool).await.unwrap();
+pub async fn get(state: web::Data<AppState>, params: web::Query<Params>) -> HttpResponse {
+    let events = Events::r#where(
+        &state.pool,
+        params.year.clone(),
+        params.activity.clone(),
+        params.group.clone(),
+    )
+    .await
+    .unwrap();
     HttpResponse::Ok().body(
         SetScoresTemplate {
             events,
+            activity_types: state.config.events.clone(),
+            year_types: state.config.years.clone(),
+            group_types: state.config.genders.clone(),
             forms: state.config.forms.clone(),
             scores: state.config.scores.clone(),
         }
@@ -46,4 +56,11 @@ pub async fn post(
     });
 
     HttpResponse::NoContent().finish()
+}
+
+#[derive(serde::Deserialize)]
+struct Params {
+    year: Option<String>,
+    activity: Option<String>,
+    group: Option<String>,
 }

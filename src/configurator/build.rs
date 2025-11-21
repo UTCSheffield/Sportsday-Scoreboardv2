@@ -40,6 +40,7 @@ pub fn build_plan(configuration: Configuration) -> Plan {
                         id: format!("{}-{}-{}", year_plan.clone().id, gender, event.clone().id),
                         name: event.clone().name,
                         gender_id: gender.clone(),
+                        filter_key: event.clone().id,
                         scores: empty_scores.clone(),
                     })
                 }
@@ -69,5 +70,6 @@ pub struct EventPlan {
     pub id: String,
     pub name: String,
     pub gender_id: String,
+    pub filter_key: String,
     pub scores: String,
 }

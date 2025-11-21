@@ -2,7 +2,10 @@ use askama::Template;
 use std::collections::HashMap;
 
 use crate::{
-    configurator::parser::{Form, Score},
+    configurator::{
+        self,
+        parser::{Form, Score},
+    },
     db::{events::Events, years::Years},
     routes::results::ResultsEvent,
 };
@@ -32,6 +35,9 @@ pub struct ScoreboardPartialTemplate {
 #[template(path = "set_scores.html")]
 pub struct SetScoresTemplate {
     pub events: Vec<Events>,
+    pub activity_types: Vec<configurator::parser::Event>,
+    pub year_types: Vec<configurator::parser::Year>,
+    pub group_types: Vec<String>,
     pub forms: Vec<Form>,
     pub scores: Vec<Score>,
 }

@@ -23,6 +23,7 @@ pub async fn run(plan: Plan, pool: &Pool) -> Result<(), async_sqlite::Error> {
                     event.clone().id,
                     event.clone().name,
                     event.clone().gender_id,
+                    event.clone().filter_key,
                     event.clone().scores,
                 )
                 .await?

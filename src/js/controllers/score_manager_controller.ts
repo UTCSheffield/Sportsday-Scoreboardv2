@@ -24,6 +24,28 @@ export default class extends Controller {
             }
         })
 
+        document.addEventListener("doSafeScoreRedirect", async (e: any) => {
+            if (!this.getLockState()) {
+                this.lockValue = String(true);
+                console.log("Score Manager: Obtained Lock")
+                const data = JSON.parse(this.containerTarget.innerText);
+                if (Object.keys(data).length != 0) {
+                    let res = await fetch("/set_scores", {
+                        method: "POST",
+                        body: this.containerTarget.innerText,
+                    });
+                    if (res.status == 204) {
+                        this.containerTarget.innerText = "{}";
+                    } else {
+                        console.log(`Set Scores failed with status ${res.status}:`, res.body);
+                    }
+                }
+                location.search = e.detail.params
+                this.lockValue = String(false);
+                console.log("Score Manager: Released Lock")
+            }
+        })
+
         setInterval(async () => {
             if (!this.getLockState()) {
                 this.lockValue = String(true);

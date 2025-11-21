@@ -22,6 +22,7 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
                 name TEXT NOT NULL,
                 year_id TEXT NOT NULL,
                 gender_id TEXT NOT NULL,
+                filter_key TEXT NOT NULL,
                 scores TEXT NOT NULL DEFAULT '{}',
                 FOREIGN KEY (year_id) REFERENCES years(id)
             );",

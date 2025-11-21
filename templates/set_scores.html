@@ -1,6 +1,35 @@
 {% extends "layouts/index.html" %}
 {% block content %}
 
+<div class="flex">
+    <button data-controller="filter" data-filter-key-value="year" data-filter-value-value="all"
+        data-action="filter#filter" class="clicklink">All</button>
+    {% for year in year_types %}
+    <button data-controller="filter" data-filter-key-value="year" data-filter-value-value="{{ year.id }}"
+        data-action="filter#filter" class="clicklink">{{ year.name
+        }}</button>
+    {% endfor %}
+</div>
+<div class="flex">
+    <button data-controller="filter" data-filter-key-value="group" data-filter-value-value="all"
+        data-action="filter#filter" class="clicklink">All</button>
+    {% for group in group_types %}
+    <button data-controller="filter" data-filter-key-value="group" data-filter-value-value="{{ group }}"
+        data-action="filter#filter" class="clicklink">{{
+        group }}</button>
+    {% endfor %}
+</div>
+<div class="flex">
+    <button data-controller="filter" data-filter-key-value="activity" data-filter-value-value="all"
+        data-action="filter#filter" class="clicklink">All</button>
+    {% for activity in activity_types %}
+    <button data-controller="filter" data-filter-key-value="activity" data-filter-value-value="{{ activity.id }}"
+        data-action="filter#filter" class="clicklink">{{
+        activity.name }}</button>
+    {% endfor %}
+</div>
+
+
 <div class='settable'>
     <div data-controller="score-manager" data-score-manager-target="container"
         style="display: none; visibility: hidden;">{}</div>

@@ -60,9 +60,10 @@ impl Years {
         id: String,
         name: String,
         gender_id: String,
+        filter_key: String,
         scores: String,
     ) -> Result<Self, async_sqlite::Error> {
-        let event = Events::new(id, name, self.clone().id, gender_id, scores);
+        let event = Events::new(id, name, self.clone().id, gender_id, filter_key, scores);
         self.events.push(event.clone());
         event.insert(&pool).await?;
 
