@@ -7,7 +7,8 @@ export default class extends Controller {
 
     override connect() {
         const channel = this.channelValue
-        this.ws = new WebSocket(`${location.protocol}/ws/${channel}`)
+        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+        this.ws = new WebSocket(`${wsProtocol}//${location.host}/ws/${channel}`)
         this.ws.onmessage = (event) => {
             console.log(`${channel}: Recieved ${event.data}`)
             // Dispatch a custom event with the payload
