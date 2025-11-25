@@ -2,6 +2,8 @@ use std::future::{ready, Future, Ready};
 use std::pin::Pin;
 use std::rc::Rc;
 
+use actix_web::cookie::Cookie;
+use actix_web::web::Redirect;
 use actix_web::{
     body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
@@ -117,11 +119,16 @@ where
 
             if session_data.is_none() {
                 log::debug!("No session_data cookie found");
-                return Ok(req.into_response(
-                    HttpResponse::Unauthorized()
-                        .body("Authentication required")
-                        .map_into_right_body(),
-                ));
+                let oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
+                let redirect_url = format!(
+                    "https://github.com/login/oauth/authorize?client_id={}&scope=user:email",
+                    oauth_client_id
+                );
+                let res = HttpResponse::Found()
+                    .append_header(("Location", redirect_url))
+                    .cookie(Cookie::build("redirect-to", req.path()).path("/").finish())
+                    .finish();
+                return Ok(req.into_response(res).map_into_right_body());
             }
 
             log::debug!(

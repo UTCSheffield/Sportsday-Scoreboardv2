@@ -1,6 +1,8 @@
 use actix_web::{
     cookie::{time::Duration, Cookie},
-    get, web, HttpResponse,
+    get,
+    web::{self, Redirect},
+    HttpRequest, HttpResponse,
 };
 use askama::Template;
 use log::{debug, error};
@@ -13,6 +15,7 @@ use crate::{db, templates::IndexTemplate, AppState};
 #[get("/oauth/callback")]
 pub async fn callback_get(
     state: web::Data<AppState>,
+    req: HttpRequest,
     params: web::Query<CallbackParams>,
 ) -> HttpResponse {
     let exchage_req = state
@@ -102,9 +105,14 @@ pub async fn callback_get(
 
     debug!("Setting cookie: session_data={}", session.id);
 
-    HttpResponse::Ok()
+    let redirect_to = req
+        .cookie("redirect-to")
+        .map(|c| c.value().to_string())
+        .unwrap_or_else(|| "/".to_string());
+    HttpResponse::Found()
+        .append_header(("Location", redirect_to))
         .cookie(cookie)
-        .body(IndexTemplate {}.render().expect("Template should be valid"))
+        .finish()
 }
 
 #[derive(serde::Deserialize)]
