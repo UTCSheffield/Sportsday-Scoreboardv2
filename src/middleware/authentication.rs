@@ -3,7 +3,6 @@ use std::pin::Pin;
 use std::rc::Rc;
 
 use actix_web::cookie::Cookie;
-use actix_web::web::Redirect;
 use actix_web::{
     body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},

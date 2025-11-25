@@ -1,14 +1,11 @@
 use actix_web::{
     cookie::{time::Duration, Cookie},
-    get,
-    web::{self, Redirect},
-    HttpRequest, HttpResponse,
+    get, web, HttpRequest, HttpResponse,
 };
-use askama::Template;
 use log::{debug, error};
 use reqwest::StatusCode;
 
-use crate::{db, templates::IndexTemplate, AppState};
+use crate::{db, AppState};
 
 // https://github.com/login/oauth/authorize?client_id=Ov23liSm3b4ovVlirQNU&redirect_uri=http://127.0.0.1:3000/oauth/callback&scope=user:email
 
