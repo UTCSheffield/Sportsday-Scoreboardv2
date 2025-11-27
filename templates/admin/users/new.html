@@ -1,0 +1,10 @@
+{% extends "../../layouts/index.html" %}
+{%- import "../../form.partials" as form -%}
+{% block content %}
+<form action="/admin/users" method="post">
+    {% call form::input("", "email", "Email", "true", "") %}
+    {% call form::checkbox("has_admin", "Has Admin?", "false", false) %}
+    {% call form::checkbox("has_set_score", "Has Set Score?", "false", false) %}
+    {% call form::submit_button("Create") %}
+</form>
+{% endblock content %}

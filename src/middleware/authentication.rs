@@ -45,19 +45,6 @@ impl AuthConfig {
             require_set_score: true,
         }
     }
-
-    /// Create a new AuthConfig requiring both admin and set_score permissions
-    pub fn require_both() -> Self {
-        Self {
-            require_admin: true,
-            require_set_score: true,
-        }
-    }
-
-    /// Create a new AuthConfig with no permission requirements (just verify session exists)
-    pub fn require_authenticated() -> Self {
-        Self::default()
-    }
 }
 
 /// Authentication middleware

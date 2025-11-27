@@ -108,15 +108,28 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("assets/", "assets/"))
             .service(routes::index::get)
             .service(routes::scoreboard::get)
+            .service(routes::results::get)
+            .service(routes::ws::get)
+            .service(routes::oauth::callback_get)
             .service(
                 web::scope("/set_scores")
                     .wrap(Authentication::new(AuthConfig::require_set_score()))
                     .service(routes::set_scores::get)
                     .service(routes::set_scores::post),
             )
-            .service(routes::results::get)
-            .service(routes::ws::get)
-            .service(routes::oauth::callback_get)
+            .service(
+                web::scope("/admin")
+                    .wrap(Authentication::new(AuthConfig::require_admin()))
+                    .service(routes::admin::get)
+                    .service(
+                        web::scope("/users")
+                            .service(routes::admin::users::list)
+                            .service(routes::admin::users::create)
+                            .service(routes::admin::users::edit)
+                            .service(routes::admin::users::update)
+                            .service(routes::admin::users::new),
+                    ),
+            )
     })
     .bind((host, port))?
     .run()

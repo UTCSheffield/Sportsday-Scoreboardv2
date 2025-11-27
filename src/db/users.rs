@@ -88,6 +88,77 @@ impl Users {
         })
     }
 
+    pub async fn insert(self, pool: &Pool) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            conn.execute(
+                "INSERT INTO users(email, has_admin, has_set_score) VALUES (?1, ?2, ?3);",
+                [
+                    self.email,
+                    ternary!(self.has_admin => 1, 0).to_string(),
+                    ternary!(self.has_set_score => 1, 0).to_string(),
+                ],
+            )
+            .unwrap();
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+
+    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM users")?;
+            let event_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+            let mut events = Vec::new();
+
+            for event in event_iter {
+                events.push(event?);
+            }
+            Ok(events)
+        })
+        .await
+    }
+
+    pub async fn find_by_id(id: i64, pool: &Pool) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM users WHERE id = ?1")?;
+            let mut rows = stmt.query([id])?;
+
+            if let Some(row) = rows.next()? {
+                Ok(Some(Self::map_from_row(row)?))
+            } else {
+                Ok(None)
+            }
+        })
+        .await
+    }
+
+    pub async fn update(
+        pool: &Pool,
+        id: i64,
+        email: String,
+        has_admin: bool,
+        has_set_score: bool,
+    ) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            conn.execute(
+                "UPDATE users SET email = ?1, has_admin = ?2, has_set_score = ?3 WHERE id = ?4;",
+                [
+                    email,
+                    ternary!(has_admin => 1, 0).to_string(),
+                    ternary!(has_set_score => 1, 0).to_string(),
+                    id.to_string(),
+                ],
+            )
+            .unwrap();
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+
     pub fn new_session(self) -> UserSessions {
         UserSessions::new(self.id.unwrap(), self.has_admin, self.has_set_score)
     }

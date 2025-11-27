@@ -6,7 +6,7 @@ use crate::{
         self,
         parser::{Form, Score},
     },
-    db::{events::Events, years::Years},
+    db::{events::Events, users::Users, years::Years},
     routes::results::ResultsEvent,
 };
 
@@ -47,4 +47,24 @@ pub struct SetScoresTemplate {
 pub struct ResultsTemplate {
     pub forms: Vec<Form>,
     pub events: Vec<ResultsEvent>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/index.html")]
+pub struct AdminIndexTemplate {}
+
+#[derive(Template)]
+#[template(path = "admin/users/list.html")]
+pub struct AdminUsersListTemplate {
+    pub users: Vec<Users>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/users/new.html")]
+pub struct AdminUsersNewTemplate {}
+
+#[derive(Template)]
+#[template(path = "admin/users/edit.html")]
+pub struct AdminUsersEditTemplate {
+    pub user: Users,
 }

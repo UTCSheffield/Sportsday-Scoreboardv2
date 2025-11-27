@@ -1,0 +1,38 @@
+{% macro input(type, name, label, required, value) %}
+<div>
+    <label for="{{ name }}">{{ label }}:</label>
+    <input name="{{ name }}" type="{{ type }}" id="{{ name }}" value="{{ value }}" {% if required=="true" %}required{%
+        endif %} class="border-1 border-white p-1 rounded-md" />
+</div>
+{% endmacro %}
+
+{% macro submit_button (label) %}
+<button type="submit">{{ label }}</button>
+{% endmacro %}
+
+{% macro select (name, label, options, required, value) %}
+<div>
+    <label for="{{ name }}">{{ label }}: </label>
+    <select name="{{ name }}" value="{{ value }}" {% if required=="true"
+        %}required{% endif %}>
+        {% for option in options %}
+        <option>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endmacro %}
+
+{% macro checkbox(name, label, required, checked) %}
+<div>
+    <label for="{{ name }}">{{ label }}:</label>
+    <input name="{{ name }}" type="checkbox" id="{{ name }}" {% if checked==true %}checked{% endif %} {% if
+        required=="true" %}required{% endif %} />
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label, required, value) %}
+<div>
+    <label for="{{ name }}">{{ label }}:</label>
+    <textarea name="{{ name }}" id="{{ name }}" {% if required=="true" %}required{% endif %}>{{ value }}</textarea>
+</div>
+{% endmacro %}

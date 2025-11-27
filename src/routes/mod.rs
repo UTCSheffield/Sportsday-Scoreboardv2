@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod index;
 pub mod oauth;
 pub mod results;
