@@ -1,55 +1,46 @@
 <table>
-    <tr>
-        <th>Year</th>
-        {% for form in forms %}
-        <th>{{ form.name }}</th>
-        {% endfor %}
-        <th>Total</th>
-    </tr>
-    {% for year in years %}
-    <tr>
-        <td>{{ year.name }}</td>
-        {% for form in forms %}
-        <td id="{{ year.id }}-{{ form.id }}" style="background-color: {{ form.colour }};">
-            {% if let Some(year_scores) = scores.get(year.id.as_str()) %}
-            {% if let Some(score) = year_scores.get(form.id.as_str()) %}
-            {{ score }}
-            {% else %}
-            0
-            {% endif %}
-            {% else %}
-            0
-            {% endif %}
-        </td>
-        {% endfor %}
-        <td>
-            <strong id="total-{{ year.id }}">
-                {% if let Some(total) = year_totals.get(year.id.as_str()) %}
-                {{ total }}
-                {% else %}
-                0
-                {% endif %}
-            </strong>
-        </td>
-    </tr>
+  <tr>
+    <th>Year</th>
+    {% for form in forms %}
+    <th>{{ form.name }}</th>
     {% endfor %}
-    <tr>
-        <td>
-            <strong>Total</strong>
-        </td>
-        {% for form in forms %}
-        <td>
-            <strong id="total-{{ form.id }}">
-                {% if let Some(total) = form_totals.get(form.id.as_str()) %}
-                {{ total }}
-                {% else %}
-                0
-                {% endif %}
-            </strong>
-        </td>
-        {% endfor %}
-        <td>
-            <strong id="total-total">{{ grand_total }}</strong>
-        </td>
-    </tr>
+    <th>Total</th>
+  </tr>
+  {% for year in years %}
+  <tr>
+    <td>{{ year.name }}</td>
+    {% for form in forms %}
+    <td
+      id="{{ year.id }}-{{ form.id }}"
+      style="background-color: {{ form.colour }};"
+    >
+      {% if let Some(year_scores) = scores.get(year.id.as_str()) %} {% if let
+      Some(score) = year_scores.get(form.id.as_str()) %} {{ score }} {% else %}
+      0 {% endif %} {% else %} 0 {% endif %}
+    </td>
+    {% endfor %}
+    <td>
+      <strong id="total-{{ year.id }}">
+        {% if let Some(total) = year_totals.get(year.id.as_str()) %} {{ total }}
+        {% else %} 0 {% endif %}
+      </strong>
+    </td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td>
+      <strong>Total</strong>
+    </td>
+    {% for form in forms %}
+    <td>
+      <strong id="total-{{ form.id }}">
+        {% if let Some(total) = form_totals.get(form.id.as_str()) %} {{ total }}
+        {% else %} 0 {% endif %}
+      </strong>
+    </td>
+    {% endfor %}
+    <td>
+      <strong id="total-total">{{ grand_total }}</strong>
+    </td>
+  </tr>
 </table>

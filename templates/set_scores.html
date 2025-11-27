@@ -1,74 +1,127 @@
-{% extends "layouts/index.html" %}
-{% block content %}
+{% extends "layouts/index.html" %} {% block content %}
 
 <div class="flex">
-    <button data-controller="filter" data-filter-key-value="year" data-filter-value-value="all"
-        data-action="filter#filter" class="clicklink">All</button>
-    {% for year in year_types %}
-    <button data-controller="filter" data-filter-key-value="year" data-filter-value-value="{{ year.id }}"
-        data-action="filter#filter" class="clicklink">{{ year.name
-        }}</button>
-    {% endfor %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="year"
+    data-filter-value-value="all"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    All
+  </button>
+  {% for year in year_types %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="year"
+    data-filter-value-value="{{ year.id }}"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    {{ year.name }}
+  </button>
+  {% endfor %}
 </div>
 <div class="flex">
-    <button data-controller="filter" data-filter-key-value="group" data-filter-value-value="all"
-        data-action="filter#filter" class="clicklink">All</button>
-    {% for group in group_types %}
-    <button data-controller="filter" data-filter-key-value="group" data-filter-value-value="{{ group }}"
-        data-action="filter#filter" class="clicklink">{{
-        group }}</button>
-    {% endfor %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="group"
+    data-filter-value-value="all"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    All
+  </button>
+  {% for group in group_types %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="group"
+    data-filter-value-value="{{ group }}"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    {{ group }}
+  </button>
+  {% endfor %}
 </div>
 <div class="flex">
-    <button data-controller="filter" data-filter-key-value="activity" data-filter-value-value="all"
-        data-action="filter#filter" class="clicklink">All</button>
-    {% for activity in activity_types %}
-    <button data-controller="filter" data-filter-key-value="activity" data-filter-value-value="{{ activity.id }}"
-        data-action="filter#filter" class="clicklink">{{
-        activity.name }}</button>
-    {% endfor %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="activity"
+    data-filter-value-value="all"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    All
+  </button>
+  {% for activity in activity_types %}
+  <button
+    data-controller="filter"
+    data-filter-key-value="activity"
+    data-filter-value-value="{{ activity.id }}"
+    data-action="filter#filter"
+    class="clicklink"
+  >
+    {{ activity.name }}
+  </button>
+  {% endfor %}
 </div>
 
-
-<div class='settable'>
-    <div data-controller="score-manager" data-score-manager-target="container"
-        style="display: none; visibility: hidden;">{}</div>
-    <table border=1>
-        <tr>
-            <th>Activity</th>
-            <th>Year</th>
-            <th>Group</th>
-            {% for form in forms %}
-            <th>{{ form.name }}</th>
-            {% endfor %}
-            <th>Change Score</th>
-        </tr>
-        {% for event in events %}
-        <tr data-controller="score-set" data-score-set-target="form" id="{{ event.id }}">
-            <td>
-                {{ event.name }}
-            </td>
-            <td>
-                {{ event.year_id }}
-            </td>
-            <td>
-                {{ event.gender_id }}
-            </td>
-            {% for form in forms %}
-            <td style="background-color: {{ form.colour }};">
-                <select id="{{ event.id }}-{{ form.id }}" data-score-set-target="field">
-                    {% for score in scores %}
-                    <option value="{{ score.value }}" {% if score.default %} selected=true {% endif %}>{{
-                        score.name }}</option>
-                    {% endfor %}
-                </select>
-            </td>
-            {% endfor %}
-            <td class="setscorebutt">
-                <button type="button" data-action="click->score-set#submit">Set Score</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="settable">
+  <div
+    data-controller="score-manager"
+    data-score-manager-target="container"
+    style="display: none; visibility: hidden"
+  >
+    {}
+  </div>
+  <table border="1">
+    <tr>
+      <th>Activity</th>
+      <th>Year</th>
+      <th>Group</th>
+      {% for form in forms %}
+      <th>{{ form.name }}</th>
+      {% endfor %}
+      <th>Change Score</th>
+    </tr>
+    {% for event in events %}
+    <tr
+      data-controller="score-set"
+      data-score-set-target="form"
+      id="{{ event.id }}"
+    >
+      <td>{{ event.name }}</td>
+      <td>{{ event.year_id }}</td>
+      <td>{{ event.gender_id }}</td>
+      {% for form in forms %}
+      <td style="background-color: {{ form.colour }};">
+        <select id="{{ event.id }}-{{ form.id }}" data-score-set-target="field">
+          {% for score in scores %}
+          <option
+            value="{{ score.value }}"
+            {%
+            if
+            score.default
+            %}
+            selected="true"
+            {%
+            endif
+            %}
+          >
+            {{ score.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </td>
+      {% endfor %}
+      <td class="setscorebutt">
+        <button type="button" data-action="click->score-set#submit">
+          Set Score
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock content %}

@@ -1,8 +1,11 @@
-{% extends "layouts/index.html" %}
-{% block content %}
-<div data-controller="websocket" data-websocket-channel-value="scores" id="scores">
-    <div data-controller="score-update" data-score-update-target="output">
-        {{ scores|safe }}
-    </div>
+{% extends "layouts/index.html" %} {% block content %}
+<div
+  data-controller="websocket"
+  data-websocket-channel-value="scores"
+  id="scores"
+>
+  <div data-controller="score-update" data-score-update-target="output">
+    {{ scores|safe }}
+  </div>
 </div>
 {% endblock content %}

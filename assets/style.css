@@ -1,186 +1,183 @@
 @font-face {
-    font-family: "Frankin-Gothic-Demi";
-    src: url('/assets/FRADM.ttf') format('truetype');
+  font-family: "Frankin-Gothic-Demi";
+  src: url("/assets/FRADM.ttf") format("truetype");
 }
 
 html {
-    font-family: 'Frankin-Gothic-Demi', sans-serif;
-    font-size: 1.5vw;
-    line-height: 1.5;
-    color: #333;
-    background-color: #fff;
+  font-family: "Frankin-Gothic-Demi", sans-serif;
+  font-size: 1.5vw;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
 }
 
 table {
-    width: 100%;
+  width: 100%;
 }
 
 th {
-    font-size: 3vw;
+  font-size: 3vw;
 }
 
 td {
-    font-size: 3vw;
-    text-align: center;
+  font-size: 3vw;
+  text-align: center;
 }
 
 table,
 td,
 th {
-    border: 5px solid;
-    border-collapse: collapse;
+  border: 5px solid;
+  border-collapse: collapse;
 }
 
 .settable td {
-    font-size: 1vw;
+  font-size: 1vw;
 }
 
 .settable th {
-    font-size: 1.3vw;
+  font-size: 1.3vw;
 }
 
 .settable input {
-    font-size: 1vw;
-    width: 100%;
-    height: 100%;
-    border: 0px;
-    box-sizing: border-box;
-    background-color: #ddd;
-    opacity: 0.7;
+  font-size: 1vw;
+  width: 100%;
+  height: 100%;
+  border: 0px;
+  box-sizing: border-box;
+  background-color: #ddd;
+  opacity: 0.7;
 }
 
 .setscorebutt {
-    background-attachment: fixed;
-    background-color: #000;
-    opacity: 1;
-    padding: 0px;
+  background-attachment: fixed;
+  background-color: #000;
+  opacity: 1;
+  padding: 0px;
 }
 
 .settable * {
-    border: 2px solid;
-    border-collapse: collapse;
+  border: 2px solid;
+  border-collapse: collapse;
 }
 
 .settable turbo-cable-stream-source {
-    border: 0px;
+  border: 0px;
 }
 
 h1 {
-    font-size: 4vw;
+  font-size: 4vw;
 }
 
 .header {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 1fr;
-    grid-column-gap: 15px;
-    grid-row-gap: 0px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 15px;
+  grid-row-gap: 0px;
 }
 
 h3 {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .footer {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 1fr;
-    grid-column-gap: 15px;
-    grid-row-gap: 0px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 15px;
+  grid-row-gap: 0px;
 }
 
 a {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 5px;
-    color: #fff;
-    text-decoration: none;
-    background-color: #009bb4;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #009bb4;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
 button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 5px;
-    color: #fff;
-    text-decoration: none;
-    background-color: #009bb4;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #009bb4;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
-
 .clicklink {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 5px;
-    color: #fff;
-    text-decoration: none;
-    background-color: #009bb4;
-    border: none;
-    transition: background-color 0.3s ease;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #009bb4;
+  border: none;
+  transition: background-color 0.3s ease;
 }
 
 a:hover {
-    background-color: #ee7d00;
+  background-color: #ee7d00;
 }
 
 a:visited {
-    color: #fff;
+  color: #fff;
 }
 
 button:hover {
-    background-color: #ee7d00;
+  background-color: #ee7d00;
 }
 
 button:visited {
-    color: #fff;
+  color: #fff;
 }
 
 .linkgon {
-    background: none;
-    width: 100%;
-    height: 100%;
-    padding: 0px 0px;
-    border: none;
-    display: inline-block;
-    margin: 0px;
+  background: none;
+  width: 100%;
+  height: 100%;
+  padding: 0px 0px;
+  border: none;
+  display: inline-block;
+  margin: 0px;
 }
 
 .linkgon a:hover {
-    background: none !important;
-    background-color: #fff;
-    transition: none;
+  background: none !important;
+  background-color: #fff;
+  transition: none;
 }
 
 .linkgon button:hover {
-    background: none !important;
-    background-color: #fff;
-    transition: none;
+  background: none !important;
+  background-color: #fff;
+  transition: none;
 }
 
 /* ee7d00 009bb4 */
 .message {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 5px;
-    color: #fff;
-    text-decoration: none;
-    background-color: #ee7d00;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    font-size: 2vw;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #ee7d00;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  font-size: 2vw;
 }
 
-
 @media only screen and (max-width: 1000px) {
-
-    .settable th,
-    .settable td,
-    .settable input,
-    a {
-        font-size: 3.5vw;
-    }
+  .settable th,
+  .settable td,
+  .settable input,
+  a {
+    font-size: 3.5vw;
+  }
 }

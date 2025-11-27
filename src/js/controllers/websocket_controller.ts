@@ -1,48 +1,50 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static override values = {
-        channel: String
+  static override values = {
+    channel: String,
+  };
+
+  override connect() {
+    const channel = this.channelValue;
+    const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
+    this.ws = new WebSocket(`${wsProtocol}//${location.host}/ws/${channel}`);
+    this.ws.onmessage = (event) => {
+      console.log(`${channel}: Recieved ${event.data}`);
+      // Dispatch a custom event with the payload
+      document.dispatchEvent(
+        new CustomEvent("wsmessage", {
+          detail: { channel, data: event.data },
+        }),
+      );
+    };
+
+    this.ws.onopen = () => {
+      console.log(`Connected to ${channel}`);
+    };
+
+    this.ws.onclose = () => {
+      console.log(`Disconnected from ${channel}`);
+      setTimeout(() => {
+        console.log(`Automatically reconnecting to ${channel}`);
+        this.connect();
+      }, 5000);
+    };
+  }
+
+  override disconnect() {
+    if (this.ws) {
+      this.ws.close();
     }
+  }
 
-    override connect() {
-        const channel = this.channelValue
-        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-        this.ws = new WebSocket(`${wsProtocol}//${location.host}/ws/${channel}`)
-        this.ws.onmessage = (event) => {
-            console.log(`${channel}: Recieved ${event.data}`)
-            // Dispatch a custom event with the payload
-            document.dispatchEvent(new CustomEvent("wsmessage", {
-                detail: { channel, data: event.data }
-            }))
-        }
+  send(event: any) {
+    // Send a message (e.g. from a form submit)
+    const data = event.detail || {};
+    this.ws.send(JSON.stringify(data));
+  }
 
-        this.ws.onopen = () => {
-            console.log(`Connected to ${channel}`)
-        }
-
-        this.ws.onclose = () => {
-            console.log(`Disconnected from ${channel}`)
-            setTimeout(() => {
-                console.log(`Automatically reconnecting to ${channel}`)
-                this.connect();
-            }, 5000)
-        }
-    }
-
-    override disconnect() {
-        if (this.ws) {
-            this.ws.close()
-        }
-    }
-
-    send(event: any) {
-        // Send a message (e.g. from a form submit)
-        const data = event.detail || {}
-        this.ws.send(JSON.stringify(data))
-    }
-
-    declare ws: WebSocket;
-    declare channelValue: string;
-    declare hasChanelValue: boolean;
+  declare ws: WebSocket;
+  declare channelValue: string;
+  declare hasChanelValue: boolean;
 }

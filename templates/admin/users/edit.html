@@ -1,10 +1,9 @@
-{% extends "../../layouts/index.html" %}
-{%- import "../../form.partials" as form -%}
-{% block content %}
+{% extends "../../layouts/index.html" %} {%- import "../../form.partials" as
+form -%} {% block content %}
 <form action="/admin/users/edit/{{ user.id.unwrap() }}" method="post">
-    {% call form::input("", "email", "Email", "true", user.email) %}
-    {% call form::checkbox("has_admin", "Has Admin?", "false", user.has_admin) %}
-    {% call form::checkbox("has_set_score", "Has Set Score?", "false", user.has_set_score) %}
-    {% call form::submit_button("Update") %}
+  {% call form::input("", "email", "Email", "true", user.email) %} {% call
+  form::checkbox("has_admin", "Has Admin?", "false", user.has_admin) %} {% call
+  form::checkbox("has_set_score", "Has Set Score?", "false", user.has_set_score)
+  %} {% call form::submit_button("Update") %}
 </form>
 {% endblock content %}

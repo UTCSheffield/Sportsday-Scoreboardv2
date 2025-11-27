@@ -1,34 +1,30 @@
-{% extends "../../layouts/index.html" %}
-{% block content %}
+{% extends "../../layouts/index.html" %} {% block content %}
 <a href="/admin/user/new">New User</a>
 <table>
-    <thead>
-        <th>ID</th>
-        <th>Email</th>
-        <th>Admin?</th>
-        <th>Can Set Scores?</th>
-        <th>Buttons</th>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>
-                {{ user.id.unwrap() }}
-            </td>
-            <td>
-                {{ user.email }}
-            </td>
-            <td>
-                {{ user.has_admin }}
-            </td>
-            <td>
-                {{ user.has_set_score }}
-            </td>
-            <td>
-                <a href="/admin/users/edit/{ user.id.unwrap()}" class="linkgon" style="color: black;">Edit</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <th>ID</th>
+    <th>Email</th>
+    <th>Admin?</th>
+    <th>Can Set Scores?</th>
+    <th>Buttons</th>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id.unwrap() }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.has_admin }}</td>
+      <td>{{ user.has_set_score }}</td>
+      <td>
+        <a
+          href="/admin/users/edit/{ user.id.unwrap()}"
+          class="linkgon"
+          style="color: black"
+          >Edit</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock content %}
