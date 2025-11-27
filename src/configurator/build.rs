@@ -26,18 +26,6 @@ pub fn build_plan(configuration: Configuration) -> Plan {
             if !configuration.is_event_applicable_to_year(event, &year.clone().id) {
                 continue;
             }
-            let mut applies_to_at_least_one_form = false;
-            for form in config.forms.iter() {
-                if configuration.is_event_applicable_to_form(event, form.clone().id) {
-                    applies_to_at_least_one_form = true;
-                    break;
-                }
-            }
-
-            if !applies_to_at_least_one_form {
-                continue;
-            }
-
             for gender in config.genders.iter() {
                 if configuration.is_event_applicable_to_gender(event, gender) {
                     year_plan.events.push(EventPlan {

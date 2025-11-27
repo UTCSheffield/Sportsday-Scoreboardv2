@@ -46,8 +46,6 @@ pub struct Event {
     pub name: String,
     /// Rules for which years this event applies to
     pub applicable_years: ApplicabilityRules,
-    /// Rules for which forms this event applies to
-    pub applicable_forms: ApplicabilityRules,
     /// Rules for which gender this event applies to
     pub applicable_genders: ApplicabilityRules,
 }
@@ -92,16 +90,6 @@ impl Configuration {
             ApplicabilityRules::None => false,
             ApplicabilityRules::Include { ids } => ids.contains(&year_id.to_string()),
             ApplicabilityRules::Exclude { ids } => !ids.contains(&year_id.to_string()),
-        }
-    }
-
-    /// Check if an event applies to a specific form
-    pub fn is_event_applicable_to_form(&self, event: &Event, form_id: String) -> bool {
-        match &event.applicable_forms {
-            ApplicabilityRules::All => true,
-            ApplicabilityRules::None => false,
-            ApplicabilityRules::Include { ids } => ids.contains(&form_id),
-            ApplicabilityRules::Exclude { ids } => !ids.contains(&form_id),
         }
     }
 

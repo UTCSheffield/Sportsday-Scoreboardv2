@@ -1,4 +1,4 @@
-version: 1
+version: 2025
 genders: ["boys", "girls", "mixed"]
 
 years:
@@ -28,16 +28,12 @@ events:
     name: 60m
     applicable_years:
       type: all
-    applicable_forms:
-      type: all
     applicable_genders:
       type: exclude
       ids: ["mixed"]
   - id: 200m
     name: 200m
     applicable_years:
-      type: all
-    applicable_forms:
       type: all
     applicable_genders:
       type: exclude
@@ -46,16 +42,12 @@ events:
     name: 400m
     applicable_years:
       type: all
-    applicable_forms:
-      type: all
     applicable_genders:
       type: exclude
       ids: ["mixed"]
   - id: 800m
     name: 800m
     applicable_years:
-      type: all
-    applicable_forms:
       type: all
     applicable_genders:
       type: exclude
@@ -64,16 +56,12 @@ events:
     name: Javelin
     applicable_years:
       type: all
-    applicable_forms:
-      type: all
     applicable_genders:
       type: exclude
       ids: ["mixed"]
   - id: shot_putt
     name: Shot Putt
     applicable_years:
-      type: all
-    applicable_forms:
       type: all
     applicable_genders:
       type: exclude
@@ -82,8 +70,6 @@ events:
     name: High Jump
     applicable_years:
       type: all
-    applicable_forms:
-      type: all
     applicable_genders:
       type: exclude
       ids: ["mixed"]
@@ -91,16 +77,12 @@ events:
     name: Long Jump
     applicable_years:
       type: all
-    applicable_forms:
-      type: all
     applicable_genders:
       type: exclude
       ids: ["mixed"]
   - id: relay
     name: 4X50 Relay
     applicable_years:
-      type: all
-    applicable_forms:
       type: all
     applicable_genders:
       type: include
