@@ -2,7 +2,7 @@ use async_sqlite::{rusqlite::Row, Pool};
 use log::debug;
 use serde_json::Value;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Events {
     pub id: String,
     pub name: String,

@@ -20,6 +20,9 @@ mod templates;
 mod utils;
 mod websocket;
 
+#[cfg(test)]
+mod test_harness;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Init Logging/Environment

@@ -5,7 +5,7 @@ use log::debug;
 use crate::db::user_sessions::UserSessions;
 use crate::ternary;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Users {
     pub id: Option<i64>,
     pub email: String,
@@ -161,5 +161,159 @@ impl Users {
 
     pub fn new_session(self) -> UserSessions {
         UserSessions::new(self.id.unwrap(), self.has_admin, self.has_set_score)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::test_harness;
+
+    use super::*;
+
+    #[test]
+    fn is_user_constructed_properly() {
+        assert_eq!(
+            Users::new("example@example.com".to_string(), true, true),
+            Users {
+                id: None,
+                email: "example@example.com".to_string(),
+                has_admin: true,
+                has_set_score: true
+            }
+        )
+    }
+
+    #[tokio::test]
+    async fn find_by_email_test() {
+        let db = test_harness::setup_db("users_find_by_email").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        let found = Users::find_by_email("example@example.com".to_string(), &db)
+            .await
+            .unwrap();
+        assert!(found.is_some());
+        let user = found.unwrap();
+        assert_eq!(
+            user,
+            Users {
+                id: Some(1),
+                email: "example@example.com".to_string(),
+                has_admin: true,
+                has_set_score: true
+            }
+        );
+    }
+
+    #[tokio::test]
+    async fn get_or_create_create_test() {
+        let db = test_harness::setup_db("users_get_or_create_create").await;
+        let req = Users::get_or_create("example@example.com".to_string(), &db).await;
+        assert!(req.is_ok());
+        assert_eq!(
+            req.unwrap(),
+            Users {
+                id: Some(1),
+                email: "example@example.com".to_string(),
+                has_admin: false,
+                has_set_score: false,
+            },
+        )
+    }
+
+    #[tokio::test]
+    async fn get_or_create_get_test() {
+        let db = test_harness::setup_db("users_get_or_create_get").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        let req = Users::get_or_create("example@example.com".to_string(), &db).await;
+        assert!(req.is_ok());
+        assert_eq!(
+            req.unwrap(),
+            Users {
+                id: Some(1),
+                email: "example@example.com".to_string(),
+                has_admin: true,
+                has_set_score: true,
+            },
+        )
+    }
+
+    #[tokio::test]
+    async fn insert_test() {
+        let db = test_harness::setup_db("users_insert").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+    }
+
+    #[tokio::test]
+    async fn all_test() {
+        let db = test_harness::setup_db("users_all").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert!(Users::new("example1@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert!(Users::new("example2@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert!(Users::new("example3@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert_eq!(Users::all(&db).await.unwrap().len(), 4);
+    }
+
+    #[tokio::test]
+    async fn find_by_id_test() {
+        let db = test_harness::setup_db("users_find_by_id").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        let found = Users::find_by_id(1, &db).await.unwrap();
+        assert!(found.is_some());
+        let user = found.unwrap();
+        assert_eq!(
+            user,
+            Users {
+                id: Some(1),
+                email: "example@example.com".to_string(),
+                has_admin: true,
+                has_set_score: true
+            }
+        );
+    }
+
+    #[tokio::test]
+    async fn update_test() {
+        let db = test_harness::setup_db("users_update").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+
+        assert!(
+            Users::update(&db, 1, "example@example.com".to_string(), true, false)
+                .await
+                .is_ok()
+        );
+        assert_eq!(
+            Users::find_by_id(1, &db)
+                .await
+                .unwrap()
+                .unwrap()
+                .has_set_score,
+            false
+        );
     }
 }

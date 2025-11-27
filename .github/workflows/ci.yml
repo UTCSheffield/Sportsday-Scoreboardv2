@@ -18,7 +18,8 @@ jobs:
         uses: actions-rust-lang/rustfmt@v1
       - name: Prettier Check
         run: bunx prettier@latest --check .
-
+      - name: Run Rust Tests
+        run: cargo test
   #  check:
   #    name: Rust project
   #    runs-on: ubuntu-latest
