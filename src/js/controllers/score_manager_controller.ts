@@ -63,6 +63,11 @@ export default class extends Controller {
       });
       if (res.status == 204) {
         this.containerTarget.innerText = "{}";
+        document.dispatchEvent(
+          new CustomEvent("scoreUpdateSubmitted", {
+            detail: {},
+          }),
+        );
       } else {
         console.log(`Set Scores failed with status ${res.status}:`, res.body);
       }
