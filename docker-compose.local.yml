@@ -1,0 +1,17 @@
+services:
+  web:
+    image: sportsday-scoreboard-v2
+    ports:
+      - "4434:3000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+    volumes:
+      - type: bind
+        source: db.sqlite
+        target: /app/db.sqlite
+      - type: bind
+        source: version.txt
+        target: /app/version.txt
+    env_file:
+      - .env
