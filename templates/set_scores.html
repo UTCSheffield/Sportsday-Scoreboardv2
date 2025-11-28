@@ -87,7 +87,8 @@
     </tr>
     {% for event in events %}
     <tr
-      data-controller="score-set"
+      data-controller="score-set score-dropdown"
+      data-score-dropdown-score-value="{{ event.scores }}"
       data-score-set-target="form"
       id="{{ event.id }}"
     >
@@ -96,21 +97,14 @@
       <td>{{ event.gender_id }}</td>
       {% for form in forms %}
       <td style="background-color: {{ form.colour }};">
-        <select id="{{ event.id }}-{{ form.id }}" data-score-set-target="field">
+        <select
+          id="{{ event.id }}-{{ form.id }}"
+          data-score-set-target="field"
+          data-score-dropdown-target="select"
+          data-form-id="{{ form.id }}"
+        >
           {% for score in scores %}
-          <option
-            value="{{ score.value }}"
-            {%
-            if
-            score.default
-            %}
-            selected="true"
-            {%
-            endif
-            %}
-          >
-            {{ score.name }}
-          </option>
+          <option value="{{ score.value }}">{{ score.name }}</option>
           {% endfor %}
         </select>
       </td>
@@ -128,4 +122,5 @@
     {% endfor %}
   </table>
 </div>
+
 {% endblock content %}
