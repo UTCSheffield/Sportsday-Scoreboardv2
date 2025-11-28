@@ -53,7 +53,7 @@ impl UserSessions {
                 Some(session) => {
                     log::debug!("DB Session ID: {} (cookie: {cookie_session})", session.id);
                     return Ok(VerifiedSession {
-                        id: cookie_session,
+                        _id: cookie_session,
                         verified: true,
                         has_admin: session.has_admin,
                         has_set_score: session.has_set_score,
@@ -62,7 +62,7 @@ impl UserSessions {
                 None => {
                     log::debug!("No Session found in db");
                     return Ok(VerifiedSession {
-                        id: cookie_session,
+                        _id: cookie_session,
                         verified: false,
                         has_admin: false,
                         has_set_score: false,
@@ -75,7 +75,7 @@ impl UserSessions {
 }
 
 pub struct VerifiedSession {
-    pub id: String,
+    pub _id: String,
     pub verified: bool,
     pub has_admin: bool,
     pub has_set_score: bool,
@@ -110,7 +110,7 @@ mod tests {
         assert!(verified_session.is_ok());
         let verified = verified_session.unwrap();
         assert_eq!(verified.verified, true);
-        assert_eq!(verified.id, session.id);
+        assert_eq!(verified._id, session.id);
     }
 
     #[tokio::test]

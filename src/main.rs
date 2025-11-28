@@ -98,6 +98,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(ActixMiddleware::Logger::default())
+            .wrap(middleware::headers::DefaultHtmlContentType)
             .app_data(web::Data::new(AppState {
                 client: client.clone(),
                 config: config.clone(),
