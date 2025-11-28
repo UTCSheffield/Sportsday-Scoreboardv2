@@ -171,7 +171,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn is_user_constructed_properly() {
+    fn is_constructed_properly() {
         assert_eq!(
             Users::new("example@example.com".to_string(), true, true),
             Users {

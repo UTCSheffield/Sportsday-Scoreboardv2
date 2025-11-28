@@ -3,7 +3,7 @@ use async_sqlite::{rusqlite::Row, Pool};
 
 use crate::ternary;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct UserSessions {
     pub id: String,
     pub user_id: i64,
@@ -53,6 +53,7 @@ impl UserSessions {
                 Some(session) => {
                     log::debug!("DB Session ID: {} (cookie: {cookie_session})", session.id);
                     return Ok(VerifiedSession {
+                        id: cookie_session,
                         verified: true,
                         has_admin: session.has_admin,
                         has_set_score: session.has_set_score,
@@ -61,6 +62,7 @@ impl UserSessions {
                 None => {
                     log::debug!("No Session found in db");
                     return Ok(VerifiedSession {
+                        id: cookie_session,
                         verified: false,
                         has_admin: false,
                         has_set_score: false,
@@ -73,7 +75,54 @@ impl UserSessions {
 }
 
 pub struct VerifiedSession {
+    pub id: String,
     pub verified: bool,
     pub has_admin: bool,
     pub has_set_score: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{db::users::Users, test_harness};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn insert_test() {
+        let db = test_harness::setup_db("user_sessions_insert").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert!(UserSessions::new(1, true, true).insert(&db).await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn verify_true_test() {
+        let db = test_harness::setup_db("user_sessions_verify_true").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        let session = UserSessions::new(1, true, true);
+        assert!(session.clone().insert(&db).await.is_ok());
+        let verified_session = UserSessions::verify(&db, session.id.clone()).await;
+        assert!(verified_session.is_ok());
+        let verified = verified_session.unwrap();
+        assert_eq!(verified.verified, true);
+        assert_eq!(verified.id, session.id);
+    }
+
+    #[tokio::test]
+    async fn verify_false_test() {
+        let db = test_harness::setup_db("user_sessions_verify_false").await;
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        let verified_session = UserSessions::verify(&db, "HelloWorld".to_string()).await;
+        assert!(verified_session.is_ok());
+        let verified = verified_session.unwrap();
+        assert_eq!(verified.verified, false);
+    }
 }
