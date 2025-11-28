@@ -68,11 +68,32 @@ export default class extends Controller {
             detail: {},
           }),
         );
+        document.dispatchEvent(
+          new CustomEvent("updateStatus", {
+            detail: {
+              status: `<p style="color: green;">Data Saved to the server!</p>`,
+            },
+          }),
+        );
       } else {
         console.log(`Set Scores failed with status ${res.status}:`, res.body);
+        document.dispatchEvent(
+          new CustomEvent("updateStatus", {
+            detail: {
+              status: `<p style="color: red;">Error Saving Data to the server, do not refresh!</p>`,
+            },
+          }),
+        );
       }
     } catch (e) {
       console.log("Score Manager Error: ", e);
+      document.dispatchEvent(
+        new CustomEvent("updateStatus", {
+          detail: {
+            status: `<p style="color: red;">Error Saving Data to the server, do not refresh!</p>`,
+          },
+        }),
+      );
     }
   }
 
