@@ -135,6 +135,14 @@ impl Events {
         .await?;
         Ok(())
     }
+
+    pub async fn count(pool: &Pool) -> Result<i64, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let count: i64 = conn.query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))?;
+            Ok(count)
+        })
+        .await
+    }
 }
 
 #[cfg(test)]

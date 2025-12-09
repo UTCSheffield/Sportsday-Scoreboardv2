@@ -162,6 +162,14 @@ impl Users {
     pub fn new_session(self) -> UserSessions {
         UserSessions::new(self.id.unwrap(), self.has_admin, self.has_set_score)
     }
+
+    pub async fn count(pool: &Pool) -> Result<i64, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let count: i64 = conn.query_row("SELECT COUNT(*) FROM users", [], |row| row.get(0))?;
+            Ok(count)
+        })
+        .await
+    }
 }
 
 #[cfg(test)]

@@ -1,8 +1,11 @@
 use actix_web_prom::{PrometheusMetrics, PrometheusMetricsBuilder};
+use async_sqlite::Pool;
 use prometheus::Gauge;
 use std::fs;
 use std::thread;
 use std::time::Duration;
+
+use crate::db::{events::Events, users::Users};
 
 // Parse total jiffies from /proc/stat (first "cpu" line)
 fn read_total_jiffies() -> Option<u64> {
@@ -54,7 +57,7 @@ fn read_proc_rss_bytes() -> Option<u64> {
 }
 
 // Collect CPU and memory usage for the current process only (Linux /proc implementation).
-pub fn build_prom() -> PrometheusMetrics {
+pub fn build_prom(pool: Pool) -> PrometheusMetrics {
     let prometheus = PrometheusMetricsBuilder::new("api")
         .endpoint("/metrics")
         .build()
@@ -70,6 +73,8 @@ pub fn build_prom() -> PrometheusMetrics {
         "Resident memory used by this process in bytes",
     )
     .unwrap();
+    let event_count = Gauge::new("event_count", "Total number of events in the database").unwrap();
+    let user_count = Gauge::new("user_count", "Total number of users in the database").unwrap();
 
     prometheus
         .registry
@@ -81,7 +86,23 @@ pub fn build_prom() -> PrometheusMetrics {
         .register(Box::new(mem_usage.clone()))
         .unwrap();
 
+    prometheus
+        .registry
+        .register(Box::new(event_count.clone()))
+        .unwrap();
+
+    prometheus
+        .registry
+        .register(Box::new(user_count.clone()))
+        .unwrap();
+
     thread::spawn(move || {
+        // Create a new tokio runtime for async operations
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("Failed to create tokio runtime");
+
         // initial values
         let mut prev_total = read_total_jiffies().unwrap_or(0);
         let mut prev_proc = read_proc_jiffies().unwrap_or(0);
@@ -112,6 +133,17 @@ pub fn build_prom() -> PrometheusMetrics {
 
             if let Some(rss_bytes) = read_proc_rss_bytes() {
                 mem_usage.set(rss_bytes as f64);
+            }
+
+            // Update event and user counts
+            let pool_clone = pool.clone();
+            if let Ok(count) = rt.block_on(async { Events::count(&pool_clone).await }) {
+                event_count.set(count as f64);
+            }
+
+            let pool_clone = pool.clone();
+            if let Ok(count) = rt.block_on(async { Users::count(&pool_clone).await }) {
+                user_count.set(count as f64);
             }
         }
     });

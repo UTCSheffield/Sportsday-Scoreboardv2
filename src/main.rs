@@ -100,7 +100,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(ActixMiddleware::Logger::default())
             .wrap(middleware::headers::DefaultHtmlContentType)
-            .wrap(prometheus::build_prom())
+            .wrap(prometheus::build_prom(pool.clone()))
             .app_data(web::Data::new(AppState {
                 client: client.clone(),
                 config: config.clone(),
