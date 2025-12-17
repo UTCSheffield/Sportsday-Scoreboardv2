@@ -75,3 +75,9 @@ pub struct AdminUsersEditTemplate {
 pub struct AdminConsoleTemplate {
     pub log_entries: Vec<LogEntry>,
 }
+
+#[derive(Template)]
+#[template(path = "admin/sqlite.html")]
+pub struct AdminSqliteTemplate {
+    pub command_history: Vec<String>,
+}

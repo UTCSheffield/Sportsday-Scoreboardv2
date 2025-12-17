@@ -1,0 +1,196 @@
+{% extends "../layouts/index.html" %} {% block content %}
+<div class="sqlite-container" data-controller="sqlite">
+  <h2>SQLite Command Line</h2>
+
+  <div class="sqlite-controls">
+    <button data-action="click->sqlite#clear" class="clear-btn">
+      Clear History
+    </button>
+    <div class="sqlite-info">
+      <span class="info-text"
+        >Enter SQLite commands below. Dangerous operations are blocked for
+        security.</span
+      >
+    </div>
+  </div>
+
+  <div class="sqlite-terminal" data-sqlite-target="terminal">
+    <div class="terminal-history" data-sqlite-target="history">
+      {% if command_history.is_empty() %}
+      <div class="welcome-message">
+        <p>SQLite Command Line Interface</p>
+        <p>Type your SQL commands below. Examples:</p>
+        <p class="example-cmd">.tables</p>
+        <p class="example-cmd">.schema table_name</p>
+        <p class="example-cmd">SELECT * FROM users LIMIT 10;</p>
+      </div>
+      {% else %} {% for entry in command_history %}
+      <div class="history-entry">{{ entry }}</div>
+      {% endfor %} {% endif %}
+    </div>
+
+    <div class="command-input-container">
+      <span class="prompt">sqlite> </span>
+      <input
+        type="text"
+        data-sqlite-target="input"
+        data-action="keydown.enter->sqlite#executeCommand"
+        class="command-input"
+        placeholder="Enter SQLite command..."
+        autocomplete="off"
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  .sqlite-container {
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .sqlite-controls {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .clear-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    background: #dc3545;
+    color: white;
+  }
+
+  .clear-btn:hover {
+    background: #c82333;
+  }
+
+  .sqlite-info {
+    flex-grow: 1;
+    text-align: right;
+  }
+
+  .info-text {
+    color: #666;
+    font-size: 13px;
+  }
+
+  .sqlite-terminal {
+    height: 600px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .terminal-history {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  .welcome-message {
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .welcome-message p {
+    margin: 5px 0;
+  }
+
+  .example-cmd {
+    color: #4fc3f7 !important;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+    margin-left: 20px;
+  }
+
+  .history-entry {
+    margin-bottom: 8px;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .command-output {
+    color: #90ee90;
+    margin-left: 20px;
+    white-space: pre-wrap;
+    margin-bottom: 8px;
+  }
+
+  .command-error {
+    color: #ff6b6b;
+    margin-left: 20px;
+    white-space: pre-wrap;
+    margin-bottom: 8px;
+  }
+
+  .command-input-container {
+    padding: 15px;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+  }
+
+  .prompt {
+    color: #4fc3f7;
+    margin-right: 8px;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+    font-weight: bold;
+  }
+
+  .command-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .command-input::placeholder {
+    color: #666;
+  }
+
+  /* Loading indicator */
+  .loading {
+    color: #ffa500;
+    font-style: italic;
+  }
+
+  /* Command styles in history */
+  .user-command {
+    color: #d4d4d4;
+    margin-bottom: 4px;
+  }
+
+  .user-command::before {
+    content: "sqlite> ";
+    color: #4fc3f7;
+    font-weight: bold;
+  }
+</style>
+{% endblock content %}

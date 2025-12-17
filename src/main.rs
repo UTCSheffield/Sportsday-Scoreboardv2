@@ -145,6 +145,11 @@ async fn main() -> std::io::Result<()> {
                             .service(routes::admin::console::clear),
                     )
                     .service(
+                        web::scope("/sqlite")
+                            .service(routes::admin::sqlite::get)
+                            .service(routes::admin::sqlite::execute),
+                    )
+                    .service(
                         web::scope("/users")
                             .service(routes::admin::users::list)
                             .service(routes::admin::users::create)

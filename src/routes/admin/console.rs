@@ -3,7 +3,7 @@ use askama::Template;
 
 use crate::templates::AdminConsoleTemplate;
 
-#[get("/")]
+#[get("")]
 pub async fn get(app_state: web::Data<crate::AppState>) -> HttpResponse {
     let log_entries = app_state.log_collector.get_entries();
 

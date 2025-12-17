@@ -1,4 +1,5 @@
 pub mod console;
+pub mod sqlite;
 pub mod users;
 
 use actix_web::{get, HttpResponse};
