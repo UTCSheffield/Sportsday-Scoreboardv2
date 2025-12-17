@@ -1,5 +1,5 @@
 {% extends "../../layouts/index.html" %} {% block content %}
-<a href="/admin/user/new">New User</a>
+<a href="/admin/users/new">New User</a>
 <table>
   <thead>
     <th>ID</th>
@@ -17,7 +17,7 @@
       <td>{{ user.has_set_score }}</td>
       <td>
         <a
-          href="/admin/users/edit/{ user.id.unwrap()}"
+          href="/admin/users/edit/{{ user.id.unwrap()}}"
           class="linkgon"
           style="color: black"
           >Edit</a
