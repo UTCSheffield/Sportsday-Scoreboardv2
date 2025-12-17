@@ -1,0 +1,169 @@
+{% extends "../layouts/index.html" %} {% block content %}
+<div class="console-container" data-controller="console">
+  <h2>Console Output</h2>
+
+  <div class="console-controls">
+    <button data-action="click->console#refresh" class="refresh-btn">
+      Refresh
+    </button>
+    <button data-action="click->console#clear" class="clear-btn">
+      Clear Logs
+    </button>
+    <label>
+      <input
+        type="checkbox"
+        data-console-target="autoScroll"
+        data-action="change->console#toggleAutoScroll"
+        checked
+      />
+      Auto-scroll to bottom
+    </label>
+  </div>
+
+  <div class="console-output" data-console-target="output" id="console-output">
+    {% if log_entries.is_empty() %}
+    <div class="no-logs">No log entries found</div>
+    {% else %} {% for entry in log_entries %}
+    <div class="log-entry log-{{ entry.level|lower }}">
+      <span class="log-timestamp"
+        >{{ entry.timestamp.format("%Y-%m-%d %H:%M:%S UTC") }}</span
+      >
+      <span class="log-level">[{{ entry.level }}]</span>
+      <span class="log-module">{{ entry.module }}</span>
+      <span class="log-message">{{ entry.message }}</span>
+    </div>
+    {% endfor %} {% endif %}
+  </div>
+</div>
+
+<style>
+  .console-container {
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .console-controls {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .refresh-btn,
+  .clear-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .refresh-btn {
+    background: #007bff;
+    color: white;
+  }
+
+  .refresh-btn:hover {
+    background: #0056b3;
+  }
+
+  .clear-btn {
+    background: #dc3545;
+    color: white;
+  }
+
+  .clear-btn:hover {
+    background: #c82333;
+  }
+
+  .console-output {
+    height: 600px;
+    overflow-y: auto;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 15px;
+    border-radius: 4px;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .no-logs {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 50px 0;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .log-entry {
+    margin-bottom: 2px;
+    padding: 2px 0;
+    word-wrap: break-word;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .log-timestamp {
+    color: #888;
+    margin-right: 8px;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .log-level {
+    font-weight: bold;
+    margin-right: 8px;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .log-module {
+    color: #4fc3f7;
+    margin-right: 8px;
+    font-style: italic;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  .log-message {
+    white-space: pre-wrap;
+    font-family:
+      "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Consolas",
+      "Courier New", monospace;
+  }
+
+  /* Log level colors */
+  .log-error .log-level {
+    color: #f44336;
+  }
+
+  .log-warn .log-level {
+    color: #ff9800;
+  }
+
+  .log-info .log-level {
+    color: #2196f3;
+  }
+
+  .log-debug .log-level {
+    color: #4caf50;
+  }
+
+  .log-trace .log-level {
+    color: #9c27b0;
+  }
+</style>
+{% endblock content %}

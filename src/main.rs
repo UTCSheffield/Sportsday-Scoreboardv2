@@ -8,12 +8,14 @@ use log::debug;
 
 use crate::{
     configurator::parser::Configuration,
+    logger::LogCollector,
     middleware::authentication::{AuthConfig, Authentication},
     websocket::ChannelsActor,
 };
 
 mod configurator;
 mod db;
+mod logger;
 mod middleware;
 mod prometheus;
 mod routes;
@@ -28,7 +30,16 @@ mod test_harness;
 async fn main() -> std::io::Result<()> {
     // Init Logging/Environment
     dotenv::dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    // Create log collector (store up to 1000 log entries)
+    let log_collector = LogCollector::new(1000);
+    let custom_logger = logger::CustomLogger::new(log_collector.clone());
+
+    // Initialize custom logger
+    log::set_boxed_logger(Box::new(custom_logger))
+        .map(|()| log::set_max_level(log::LevelFilter::Info))
+        .expect("Failed to initialize logger");
+
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())
@@ -105,6 +116,7 @@ async fn main() -> std::io::Result<()> {
                 client: client.clone(),
                 config: config.clone(),
                 pool: pool.clone(),
+                log_collector: log_collector.clone(),
                 oauth_creds: OauthCreds {
                     client_id: oauth_client_id.clone(),
                     client_secret: oauth_client_secret.clone(),
@@ -127,6 +139,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/admin")
                     .wrap(Authentication::new(AuthConfig::require_admin()))
                     .service(routes::admin::get)
+                    .service(routes::admin::console)
+                    .service(routes::admin::clear_console)
                     .service(
                         web::scope("/users")
                             .service(routes::admin::users::list)
@@ -146,6 +160,7 @@ async fn main() -> std::io::Result<()> {
 struct AppState {
     client: reqwest::Client,
     config: Configuration,
+    log_collector: LogCollector,
     oauth_creds: OauthCreds,
     pool: async_sqlite::Pool,
 }

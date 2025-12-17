@@ -7,6 +7,7 @@ use crate::{
         parser::{Form, Score},
     },
     db::{events::Events, users::Users, years::Years},
+    logger::LogEntry,
     routes::results::ResultsEvent,
 };
 
@@ -67,4 +68,10 @@ pub struct AdminUsersNewTemplate {}
 #[template(path = "admin/users/edit.html")]
 pub struct AdminUsersEditTemplate {
     pub user: Users,
+}
+
+#[derive(Template)]
+#[template(path = "admin/console.html")]
+pub struct AdminConsoleTemplate {
+    pub log_entries: Vec<LogEntry>,
 }

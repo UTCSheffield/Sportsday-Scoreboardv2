@@ -30,6 +30,7 @@ futures = "0.3.31"
 actix-web-prom = "0.10.0"
 prometheus = "0.14.0"
 tokio = { version = "1.48.0", features = ["rt"] }
+chrono = { version = "0.4", features = ["serde"] }
 
 [dev-dependencies]
 tokio = { version = "1.48.0", features = ["full"] }
