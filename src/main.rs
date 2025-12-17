@@ -139,8 +139,11 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/admin")
                     .wrap(Authentication::new(AuthConfig::require_admin()))
                     .service(routes::admin::get)
-                    .service(routes::admin::console)
-                    .service(routes::admin::clear_console)
+                    .service(
+                        web::scope("/console")
+                            .service(routes::admin::console::get)
+                            .service(routes::admin::console::clear),
+                    )
                     .service(
                         web::scope("/users")
                             .service(routes::admin::users::list)
