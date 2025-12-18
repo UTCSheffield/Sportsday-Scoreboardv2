@@ -21,7 +21,7 @@ forms:
     colour: "#fdfd80"
   - id: t
     name: Turing
-    colour: rgb(249, 164, 164)
+    colour: lightblue
 
 events:
   - id: 60m
