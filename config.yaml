@@ -15,7 +15,7 @@ forms:
     colour: lightgreen
   - id: e
     name: Ennis
-    colour: rgb(249, 164, 164)lightblue
+    colour: rgb(249, 164, 164)
   - id: s
     name: Sharman
     colour: "#fdfd80"
