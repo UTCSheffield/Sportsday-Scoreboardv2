@@ -112,7 +112,6 @@ impl Configuration {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
 
     #[test]
     fn test_applicability_rules_all() {
