@@ -12,16 +12,16 @@ years:
 forms:
   - id: w
     name: Winston
-    colour: lightgreen
+    colour: lightblue
   - id: e
     name: Ennis
-    colour: rgb(249, 164, 164)
+    colour: rgb(249, 164, 164) # Red
   - id: s
     name: Sharman
-    colour: "#fdfd80"
+    colour: "#fdfd80" # Yellow
   - id: t
     name: Turing
-    colour: lightblue
+    colour: lightgreen
 
 events:
   - id: 60m
