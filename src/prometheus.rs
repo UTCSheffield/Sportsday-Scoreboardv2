@@ -150,3 +150,111 @@ pub fn build_prom(pool: Pool) -> PrometheusMetrics {
 
     prometheus
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_read_total_jiffies() {
+        let result = read_total_jiffies();
+        // On Linux, this should return Some value
+        if cfg!(target_os = "linux") {
+            assert!(result.is_some());
+            if let Some(jiffies) = result {
+                assert!(jiffies > 0);
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_read_proc_jiffies() {
+        let result = read_proc_jiffies();
+        // Should return some value on Linux
+        if cfg!(target_os = "linux") {
+            assert!(result.is_some());
+            if let Some(jiffies) = result {
+                assert!(jiffies >= 0);
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_read_proc_rss_bytes() {
+        let result = read_proc_rss_bytes();
+        // Should return some value on Linux
+        if cfg!(target_os = "linux") {
+            assert!(result.is_some());
+            if let Some(bytes) = result {
+                assert!(bytes > 0);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_build_prom_creates_metrics() {
+        use crate::test_harness;
+
+        let db = test_harness::setup_db("prometheus_test").await;
+        let prom = build_prom(db.clone());
+
+        // Verify the prometheus metrics builder was created successfully
+        assert_eq!(prom.registry.gather().len() >= 4, true);
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_jiffies_increase_over_time() {
+        let first = read_total_jiffies();
+
+        // Do some work
+        let mut sum = 0u64;
+        for i in 0..1000000 {
+            sum = sum.wrapping_add(i);
+        }
+
+        let second = read_total_jiffies();
+
+        if let (Some(f), Some(s)) = (first, second) {
+            // Total jiffies should increase (or at least not decrease)
+            assert!(s >= f, "Expected jiffies to increase: {} -> {}", f, s);
+        }
+
+        // Use sum to prevent optimization
+        assert!(sum > 0);
+    }
+
+    #[test]
+    #[cfg(not(target_os = "linux"))]
+    fn test_read_functions_on_non_linux() {
+        // On non-Linux systems, these should return None
+        assert_eq!(read_total_jiffies(), None);
+        assert_eq!(read_proc_jiffies(), None);
+        assert_eq!(read_proc_rss_bytes(), None);
+    }
+
+    #[test]
+    fn test_gauge_registration() {
+        let cpu_gauge = Gauge::new("test_cpu_usage", "Test CPU usage metric").unwrap();
+
+        cpu_gauge.set(42.5);
+        assert_eq!(cpu_gauge.get(), 42.5);
+    }
+
+    #[test]
+    fn test_multiple_gauge_updates() {
+        let mem_gauge = Gauge::new("test_memory", "Test memory metric").unwrap();
+
+        mem_gauge.set(100.0);
+        assert_eq!(mem_gauge.get(), 100.0);
+
+        mem_gauge.set(200.0);
+        assert_eq!(mem_gauge.get(), 200.0);
+
+        mem_gauge.set(150.0);
+        assert_eq!(mem_gauge.get(), 150.0);
+    }
+}

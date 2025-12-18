@@ -77,3 +77,77 @@ where
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App, HttpResponse};
+
+    async fn test_handler() -> HttpResponse {
+        HttpResponse::Ok().body("test")
+    }
+
+    async fn test_handler_with_content_type() -> HttpResponse {
+        HttpResponse::Ok()
+            .content_type("application/json")
+            .body("{}")
+    }
+
+    #[actix_web::test]
+    async fn test_default_html_content_type_middleware_adds_header() {
+        let app = test::init_service(
+            App::new()
+                .wrap(DefaultHtmlContentType)
+                .route("/", web::get().to(test_handler)),
+        )
+        .await;
+
+        let req = test::TestRequest::get().uri("/").to_request();
+        let resp = test::call_service(&app, req).await;
+
+        assert!(resp.status().is_success());
+        assert_eq!(
+            resp.headers().get(header::CONTENT_TYPE).unwrap(),
+            "text/html; charset=utf-8"
+        );
+    }
+
+    #[actix_web::test]
+    async fn test_default_html_content_type_middleware_respects_existing() {
+        let app = test::init_service(
+            App::new()
+                .wrap(DefaultHtmlContentType)
+                .route("/json", web::get().to(test_handler_with_content_type)),
+        )
+        .await;
+
+        let req = test::TestRequest::get().uri("/json").to_request();
+        let resp = test::call_service(&app, req).await;
+
+        assert!(resp.status().is_success());
+        assert_eq!(
+            resp.headers().get(header::CONTENT_TYPE).unwrap(),
+            "application/json"
+        );
+        // Should add cache control for non-HTML responses
+        assert!(resp.headers().contains_key(header::CACHE_CONTROL));
+    }
+
+    #[actix_web::test]
+    async fn test_cache_control_added_for_non_html() {
+        let app = test::init_service(
+            App::new()
+                .wrap(DefaultHtmlContentType)
+                .route("/json", web::get().to(test_handler_with_content_type)),
+        )
+        .await;
+
+        let req = test::TestRequest::get().uri("/json").to_request();
+        let resp = test::call_service(&app, req).await;
+
+        assert_eq!(
+            resp.headers().get(header::CACHE_CONTROL).unwrap(),
+            "max-age=600"
+        );
+    }
+}

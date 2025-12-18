@@ -74,3 +74,266 @@ macro_rules! ternary {
         }
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::configurator::parser::{ApplicabilityRules, Configuration, Event, Form, Year};
+    use crate::test_harness;
+
+    #[test]
+    fn test_ternary_macro_true() {
+        let result = ternary!(true => "yes", "no");
+        assert_eq!(result, "yes");
+    }
+
+    #[test]
+    fn test_ternary_macro_false() {
+        let result = ternary!(false => "yes", "no");
+        assert_eq!(result, "no");
+    }
+
+    #[test]
+    fn test_ternary_macro_with_numbers() {
+        let result = ternary!(5 > 3 => 1, 0);
+        assert_eq!(result, 1);
+
+        let result = ternary!(5 < 3 => 1, 0);
+        assert_eq!(result, 0);
+    }
+
+    #[tokio::test]
+    async fn test_render_scoreboard_empty() {
+        let db = test_harness::setup_db("utils_render_scoreboard_empty").await;
+
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec!["mixed".to_string()],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let client = reqwest::Client::builder()
+            .user_agent("SportsDayScore")
+            .build()
+            .unwrap();
+
+        let log_collector = crate::logger::LogCollector::new(1000);
+
+        let state = web::Data::new(crate::AppState {
+            client,
+            config,
+            pool: db,
+            log_collector,
+            oauth_creds: crate::OauthCreds {
+                client_id: "test".to_string(),
+                client_secret: "test".to_string(),
+            },
+        });
+
+        let html = render_scoreboard(state).await;
+        assert!(!html.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_render_scoreboard_with_data() {
+        let db = test_harness::setup_db("utils_render_scoreboard_with_data").await;
+
+        // Create test data
+        use crate::db::events::Events;
+        use crate::db::years::Years;
+
+        let year = Years::new("2024".to_string(), "Year 2024".to_string());
+        year.clone().insert(&db).await.unwrap();
+
+        let event = Events::new(
+            "2024-mixed-event1".to_string(),
+            "Event 1".to_string(),
+            "2024".to_string(),
+            "mixed".to_string(),
+            "event1".to_string(),
+            r#"{"form1":"10","form2":"20"}"#.to_string(),
+        );
+        event.insert(&db).await.unwrap();
+
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec!["mixed".to_string()],
+            scores: vec![],
+            years: vec![Year {
+                id: "2024".to_string(),
+                name: "Year 2024".to_string(),
+            }],
+            forms: vec![
+                Form {
+                    id: "form1".to_string(),
+                    name: "Form 1".to_string(),
+                    colour: "#ff0000".to_string(),
+                },
+                Form {
+                    id: "form2".to_string(),
+                    name: "Form 2".to_string(),
+                    colour: "#00ff00".to_string(),
+                },
+            ],
+            events: vec![Event {
+                id: "event1".to_string(),
+                name: "Event 1".to_string(),
+                applicable_years: ApplicabilityRules::All,
+                applicable_genders: ApplicabilityRules::All,
+            }],
+        };
+
+        let client = reqwest::Client::builder()
+            .user_agent("SportsDayScore")
+            .build()
+            .unwrap();
+
+        let log_collector = crate::logger::LogCollector::new(1000);
+
+        let state = web::Data::new(crate::AppState {
+            client,
+            config,
+            pool: db,
+            log_collector,
+            oauth_creds: crate::OauthCreds {
+                client_id: "test".to_string(),
+                client_secret: "test".to_string(),
+            },
+        });
+
+        let html = render_scoreboard(state).await;
+        assert!(!html.is_empty());
+        // The HTML should contain some form data
+        assert!(html.len() > 100);
+    }
+
+    // E2E test
+    #[actix_web::test]
+    async fn test_e2e_complete_scoreboard_calculation() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(4000);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let db_path = format!("./test/e2e_test_{}.db", id);
+        std::fs::create_dir_all("./test").ok();
+
+        let pool = async_sqlite::PoolBuilder::new()
+            .path(&db_path)
+            .open()
+            .await
+            .unwrap();
+
+        crate::create_tables(&pool).await.unwrap();
+
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec!["boys".to_string(), "girls".to_string(), "mixed".to_string()],
+            scores: vec![
+                crate::configurator::parser::Score {
+                    name: "1st".to_string(),
+                    value: 10,
+                    default: true,
+                },
+                crate::configurator::parser::Score {
+                    name: "2nd".to_string(),
+                    value: 8,
+                    default: false,
+                },
+            ],
+            years: vec![
+                Year {
+                    id: "year7".to_string(),
+                    name: "Year 7".to_string(),
+                },
+                Year {
+                    id: "year8".to_string(),
+                    name: "Year 8".to_string(),
+                },
+            ],
+            forms: vec![
+                Form {
+                    id: "form1".to_string(),
+                    name: "Form 1".to_string(),
+                    colour: "#ff0000".to_string(),
+                },
+                Form {
+                    id: "form2".to_string(),
+                    name: "Form 2".to_string(),
+                    colour: "#00ff00".to_string(),
+                },
+            ],
+            events: vec![
+                Event {
+                    id: "sprint".to_string(),
+                    name: "100m Sprint".to_string(),
+                    applicable_years: ApplicabilityRules::All,
+                    applicable_genders: ApplicabilityRules::All,
+                },
+                Event {
+                    id: "relay".to_string(),
+                    name: "4x100m Relay".to_string(),
+                    applicable_years: ApplicabilityRules::Include {
+                        ids: vec!["year8".to_string()],
+                    },
+                    applicable_genders: ApplicabilityRules::All,
+                },
+            ],
+        };
+
+        let plan = crate::configurator::build::build_plan(config.clone());
+        crate::configurator::run::run(plan, &pool).await.unwrap();
+
+        // Set scores for multiple events
+        let events = crate::db::events::Events::all(&pool).await.unwrap();
+
+        for (i, event) in events.iter().enumerate() {
+            let scores = if i % 2 == 0 {
+                serde_json::json!({
+                    "form1": "10",
+                    "form2": "8"
+                })
+            } else {
+                serde_json::json!({
+                    "form1": "8",
+                    "form2": "10"
+                })
+            };
+
+            crate::db::events::Events::set_scores(&pool, event.id.clone(), scores)
+                .await
+                .unwrap();
+        }
+
+        // Verify all events have scores
+        let scored_events = crate::db::events::Events::all(&pool).await.unwrap();
+        for event in scored_events.iter() {
+            assert!(event.scores.contains("form1"));
+            assert!(event.scores.contains("form2"));
+        }
+
+        // Test the actual scoreboard rendering
+        let client = reqwest::Client::builder()
+            .user_agent("SportsDayScore")
+            .build()
+            .unwrap();
+
+        let log_collector = crate::logger::LogCollector::new(1000);
+
+        let state = web::Data::new(crate::AppState {
+            client,
+            config,
+            pool: pool.clone(),
+            log_collector,
+            oauth_creds: crate::OauthCreds {
+                client_id: "test".to_string(),
+                client_secret: "test".to_string(),
+            },
+        });
+
+        let html = render_scoreboard(state).await;
+        assert!(!html.is_empty());
+        assert!(scored_events.len() > 0);
+    }
+}

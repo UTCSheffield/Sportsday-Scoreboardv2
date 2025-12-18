@@ -108,3 +108,226 @@ impl Configuration {
         self.version.clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    #[test]
+    fn test_applicability_rules_all() {
+        let rules = ApplicabilityRules::All;
+        let yaml = serde_yml::to_string(&rules).unwrap();
+        assert!(yaml.contains("all"));
+    }
+
+    #[test]
+    fn test_applicability_rules_none() {
+        let rules = ApplicabilityRules::None;
+        let yaml = serde_yml::to_string(&rules).unwrap();
+        assert!(yaml.contains("none"));
+    }
+
+    #[test]
+    fn test_applicability_rules_include() {
+        let rules = ApplicabilityRules::Include {
+            ids: vec!["year7".to_string(), "year8".to_string()],
+        };
+        let yaml = serde_yml::to_string(&rules).unwrap();
+        assert!(yaml.contains("include"));
+        assert!(yaml.contains("year7"));
+    }
+
+    #[test]
+    fn test_applicability_rules_exclude() {
+        let rules = ApplicabilityRules::Exclude {
+            ids: vec!["year7".to_string()],
+        };
+        let yaml = serde_yml::to_string(&rules).unwrap();
+        assert!(yaml.contains("exclude"));
+        assert!(yaml.contains("year7"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_year_all() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::All,
+            applicable_genders: ApplicabilityRules::All,
+        };
+
+        assert!(config.is_event_applicable_to_year(&event, "year7"));
+        assert!(config.is_event_applicable_to_year(&event, "year8"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_year_none() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::None,
+            applicable_genders: ApplicabilityRules::All,
+        };
+
+        assert!(!config.is_event_applicable_to_year(&event, "year7"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_year_include() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::Include {
+                ids: vec!["year7".to_string(), "year8".to_string()],
+            },
+            applicable_genders: ApplicabilityRules::All,
+        };
+
+        assert!(config.is_event_applicable_to_year(&event, "year7"));
+        assert!(config.is_event_applicable_to_year(&event, "year8"));
+        assert!(!config.is_event_applicable_to_year(&event, "year9"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_year_exclude() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::Exclude {
+                ids: vec!["year7".to_string()],
+            },
+            applicable_genders: ApplicabilityRules::All,
+        };
+
+        assert!(!config.is_event_applicable_to_year(&event, "year7"));
+        assert!(config.is_event_applicable_to_year(&event, "year8"));
+        assert!(config.is_event_applicable_to_year(&event, "year9"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_gender_all() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::All,
+            applicable_genders: ApplicabilityRules::All,
+        };
+
+        assert!(config.is_event_applicable_to_gender(&event, "boys"));
+        assert!(config.is_event_applicable_to_gender(&event, "girls"));
+        assert!(config.is_event_applicable_to_gender(&event, "mixed"));
+    }
+
+    #[test]
+    fn test_configuration_is_event_applicable_to_gender_include() {
+        let config = Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        let event = Event {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            applicable_years: ApplicabilityRules::All,
+            applicable_genders: ApplicabilityRules::Include {
+                ids: vec!["boys".to_string()],
+            },
+        };
+
+        assert!(config.is_event_applicable_to_gender(&event, "boys"));
+        assert!(!config.is_event_applicable_to_gender(&event, "girls"));
+    }
+
+    #[test]
+    fn test_configuration_get_version() {
+        let config = Configuration {
+            version: "2.5.3".to_string(),
+            genders: vec![],
+            scores: vec![],
+            years: vec![],
+            forms: vec![],
+            events: vec![],
+        };
+
+        assert_eq!(config.get_version(), "2.5.3");
+    }
+
+    #[test]
+    fn test_configuration_from_yaml_file() {
+        use std::io::Write;
+        use tempfile::NamedTempFile;
+
+        let yaml_content = "version: \"1.0.0\"\ngenders:\n  - boys\n  - girls\n  - mixed\nscores:\n  - name: \"1st\"\n    value: 10\n    default: true\n  - name: \"2nd\"\n    value: 8\n    default: false\nyears:\n  - id: \"year7\"\n    name: \"Year 7\"\nforms:\n  - id: \"form1\"\n    name: \"Form 1\"\n    colour: \"#ff0000\"\nevents:\n  - id: \"event1\"\n    name: \"Event 1\"\n    applicable_years:\n      type: all\n    applicable_genders:\n      type: all\n";
+
+        let mut temp_file = NamedTempFile::new().unwrap();
+        temp_file.write_all(yaml_content.as_bytes()).unwrap();
+        temp_file.flush().unwrap();
+
+        let config = Configuration::from_yaml_file(temp_file.path().to_str().unwrap()).unwrap();
+
+        assert_eq!(config.version, "1.0.0");
+        assert_eq!(config.genders.len(), 3);
+        assert_eq!(config.scores.len(), 2);
+        assert_eq!(config.years.len(), 1);
+        assert_eq!(config.forms.len(), 1);
+        assert_eq!(config.events.len(), 1);
+        assert_eq!(config.years[0].id, "year7");
+        assert_eq!(config.forms[0].name, "Form 1");
+    }
+
+    #[test]
+    fn test_configuration_from_yaml_file_not_found() {
+        let result = Configuration::from_yaml_file("nonexistent.yaml");
+        assert!(result.is_err());
+    }
+}

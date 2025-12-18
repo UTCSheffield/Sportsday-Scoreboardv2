@@ -324,4 +324,153 @@ mod tests {
             false
         );
     }
+
+    #[tokio::test]
+    async fn new_session_test() {
+        let _db = test_harness::setup_db("users_new_session").await;
+        let user = Users::new("example@example.com".to_string(), true, true);
+        let user_with_id = Users {
+            id: Some(1),
+            email: user.email.clone(),
+            has_admin: user.has_admin,
+            has_set_score: user.has_set_score,
+        };
+
+        let session = user_with_id.new_session();
+        assert_eq!(session.user_id, 1);
+        assert_eq!(session.has_admin, true);
+        assert_eq!(session.has_set_score, true);
+        assert!(!session.id.is_empty());
+    }
+
+    #[tokio::test]
+    async fn count_test() {
+        let db = test_harness::setup_db("users_count").await;
+        assert_eq!(Users::count(&db).await.unwrap(), 0);
+
+        assert!(Users::new("example@example.com".to_string(), true, true)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert_eq!(Users::count(&db).await.unwrap(), 1);
+
+        assert!(Users::new("example2@example.com".to_string(), false, false)
+            .insert(&db)
+            .await
+            .is_ok());
+        assert_eq!(Users::count(&db).await.unwrap(), 2);
+    }
+
+    #[tokio::test]
+    async fn find_by_email_not_found_test() {
+        let db = test_harness::setup_db("users_find_by_email_not_found").await;
+        let found = Users::find_by_email("nonexistent@example.com".to_string(), &db)
+            .await
+            .unwrap();
+        assert!(found.is_none());
+    }
+
+    #[tokio::test]
+    async fn find_by_id_not_found_test() {
+        let db = test_harness::setup_db("users_find_by_id_not_found").await;
+        let found = Users::find_by_id(999, &db).await.unwrap();
+        assert!(found.is_none());
+    }
+
+    // E2E tests
+    #[tokio::test]
+    async fn test_e2e_user_management() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(1000);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let db_path = format!("./test/e2e_test_{}.db", id);
+        std::fs::create_dir_all("./test").ok();
+
+        let pool = async_sqlite::PoolBuilder::new()
+            .path(&db_path)
+            .open()
+            .await
+            .unwrap();
+
+        crate::create_tables(&pool).await.unwrap();
+
+        // Create first user - should be auto-promoted to admin if first user
+        let user1 = Users::get_or_create("user1@example.com".to_string(), &pool)
+            .await
+            .unwrap();
+
+        assert!(user1.id.is_some());
+        assert_eq!(user1.email, "user1@example.com");
+
+        // Create second user
+        let user2 = Users::get_or_create("user2@example.com".to_string(), &pool)
+            .await
+            .unwrap();
+
+        assert_ne!(user1.id, user2.id);
+
+        // Update user permissions
+        Users::update(&pool, user2.id.unwrap(), user2.email.clone(), false, true)
+            .await
+            .unwrap();
+
+        let updated_user2 = Users::find_by_id(user2.id.unwrap(), &pool)
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert!(!updated_user2.has_admin);
+        assert!(updated_user2.has_set_score);
+
+        // Create and verify user session
+        let session = user1.new_session();
+        session.clone().insert(&pool).await.unwrap();
+
+        let verified_session =
+            crate::db::user_sessions::UserSessions::verify(&pool, session.id.clone())
+                .await
+                .unwrap();
+
+        assert!(verified_session.verified);
+    }
+
+    #[tokio::test]
+    async fn test_e2e_concurrent_user_operations() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        use tokio::task;
+
+        static COUNTER: AtomicU64 = AtomicU64::new(3000);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let db_path = format!("./test/e2e_test_{}.db", id);
+        std::fs::create_dir_all("./test").ok();
+
+        let pool = async_sqlite::PoolBuilder::new()
+            .path(&db_path)
+            .open()
+            .await
+            .unwrap();
+
+        crate::create_tables(&pool).await.unwrap();
+
+        // Spawn multiple concurrent tasks
+        let mut handles = vec![];
+
+        for i in 0..10 {
+            let pool = pool.clone();
+            let handle = task::spawn(async move {
+                let email = format!("user{}@example.com", i);
+                Users::get_or_create(email, &pool).await.unwrap();
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all tasks to complete
+        for handle in handles {
+            handle.await.unwrap();
+        }
+
+        // Verify all users were created
+        let users = Users::all(&pool).await.unwrap();
+        assert_eq!(users.len(), 10);
+    }
 }

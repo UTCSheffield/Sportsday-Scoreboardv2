@@ -421,4 +421,251 @@ mod tests {
         assert!(Events::delete_all(&db).await.is_ok());
         assert_eq!(Events::all(&db).await.unwrap().len(), 0);
     }
+
+    #[tokio::test]
+    async fn count_test() {
+        let db = test_harness::setup_db("events_count").await;
+        assert!(Years::new("test".to_string(), "Test".to_string())
+            .insert(&db)
+            .await
+            .is_ok());
+
+        assert_eq!(Events::count(&db).await.unwrap(), 0);
+
+        assert!(Events::new(
+            "test-test".to_string(),
+            "Test".to_string(),
+            "test".to_string(),
+            "mixed".to_string(),
+            "test".to_string(),
+            "{}".to_string()
+        )
+        .insert(&db)
+        .await
+        .is_ok());
+
+        assert_eq!(Events::count(&db).await.unwrap(), 1);
+
+        assert!(Events::new(
+            "test-test2".to_string(),
+            "Test2".to_string(),
+            "test".to_string(),
+            "mixed".to_string(),
+            "test".to_string(),
+            "{}".to_string()
+        )
+        .insert(&db)
+        .await
+        .is_ok());
+
+        assert_eq!(Events::count(&db).await.unwrap(), 2);
+    }
+
+    #[tokio::test]
+    async fn where_with_multiple_filters_test() {
+        let db = test_harness::setup_db("events_where_multiple").await;
+        assert!(Years::new("y9".to_string(), "Year 9".to_string())
+            .insert(&db)
+            .await
+            .is_ok());
+
+        assert!(Events::new(
+            "y9-boys-test".to_string(),
+            "Test".to_string(),
+            "y9".to_string(),
+            "boys".to_string(),
+            "test".to_string(),
+            "{}".to_string()
+        )
+        .insert(&db)
+        .await
+        .is_ok());
+
+        assert!(Events::new(
+            "y9-girls-test".to_string(),
+            "Test".to_string(),
+            "y9".to_string(),
+            "girls".to_string(),
+            "test".to_string(),
+            "{}".to_string()
+        )
+        .insert(&db)
+        .await
+        .is_ok());
+
+        // Filter by year and group
+        let events = Events::r#where(&db, Some("y9".to_string()), None, Some("boys".to_string()))
+            .await
+            .unwrap();
+
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].id, "y9-boys-test");
+
+        // Filter by year, activity and group
+        let events = Events::r#where(
+            &db,
+            Some("y9".to_string()),
+            Some("test".to_string()),
+            Some("boys".to_string()),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].id, "y9-boys-test");
+    }
+
+    // E2E tests
+    #[actix_web::test]
+    async fn test_e2e_event_filtering() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(5000);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let db_path = format!("./test/e2e_test_{}.db", id);
+        std::fs::create_dir_all("./test").ok();
+
+        let pool = async_sqlite::PoolBuilder::new()
+            .path(&db_path)
+            .open()
+            .await
+            .unwrap();
+
+        crate::create_tables(&pool).await.unwrap();
+
+        let config = crate::configurator::parser::Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec!["boys".to_string(), "girls".to_string(), "mixed".to_string()],
+            scores: vec![crate::configurator::parser::Score {
+                name: "1st".to_string(),
+                value: 10,
+                default: true,
+            }],
+            years: vec![
+                crate::configurator::parser::Year {
+                    id: "year7".to_string(),
+                    name: "Year 7".to_string(),
+                },
+                crate::configurator::parser::Year {
+                    id: "year8".to_string(),
+                    name: "Year 8".to_string(),
+                },
+            ],
+            forms: vec![],
+            events: vec![
+                crate::configurator::parser::Event {
+                    id: "sprint".to_string(),
+                    name: "100m Sprint".to_string(),
+                    applicable_years: crate::configurator::parser::ApplicabilityRules::All,
+                    applicable_genders: crate::configurator::parser::ApplicabilityRules::All,
+                },
+                crate::configurator::parser::Event {
+                    id: "relay".to_string(),
+                    name: "4x100m Relay".to_string(),
+                    applicable_years: crate::configurator::parser::ApplicabilityRules::Include {
+                        ids: vec!["year8".to_string()],
+                    },
+                    applicable_genders: crate::configurator::parser::ApplicabilityRules::All,
+                },
+            ],
+        };
+
+        let plan = crate::configurator::build::build_plan(config.clone());
+        crate::configurator::run::run(plan, &pool).await.unwrap();
+
+        // Test filtering by year
+        let year7_events = Events::r#where(&pool, Some("year7".to_string()), None, None)
+            .await
+            .unwrap();
+        assert_eq!(year7_events.len(), 3); // Only sprint events
+
+        let year8_events = Events::r#where(&pool, Some("year8".to_string()), None, None)
+            .await
+            .unwrap();
+        assert_eq!(year8_events.len(), 6); // Sprint + relay events
+
+        // Test filtering by gender
+        let boys_events = Events::r#where(&pool, None, None, Some("boys".to_string()))
+            .await
+            .unwrap();
+        assert_eq!(boys_events.len(), 3); // boys events across all years
+
+        // Test filtering by activity
+        let sprint_events = Events::r#where(&pool, None, Some("sprint".to_string()), None)
+            .await
+            .unwrap();
+        assert_eq!(sprint_events.len(), 6); // All sprint events
+
+        let relay_events = Events::r#where(&pool, None, Some("relay".to_string()), None)
+            .await
+            .unwrap();
+        assert_eq!(relay_events.len(), 3); // Only year8 relay events
+    }
+
+    #[actix_web::test]
+    async fn test_e2e_score_updates() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(6000);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let db_path = format!("./test/e2e_test_{}.db", id);
+        std::fs::create_dir_all("./test").ok();
+
+        let pool = async_sqlite::PoolBuilder::new()
+            .path(&db_path)
+            .open()
+            .await
+            .unwrap();
+
+        crate::create_tables(&pool).await.unwrap();
+
+        let config = crate::configurator::parser::Configuration {
+            version: "1.0.0".to_string(),
+            genders: vec!["mixed".to_string()],
+            scores: vec![],
+            years: vec![crate::configurator::parser::Year {
+                id: "year7".to_string(),
+                name: "Year 7".to_string(),
+            }],
+            forms: vec![
+                crate::configurator::parser::Form {
+                    id: "form1".to_string(),
+                    name: "Form 1".to_string(),
+                    colour: "#ff0000".to_string(),
+                },
+                crate::configurator::parser::Form {
+                    id: "form2".to_string(),
+                    name: "Form 2".to_string(),
+                    colour: "#00ff00".to_string(),
+                },
+            ],
+            events: vec![crate::configurator::parser::Event {
+                id: "sprint".to_string(),
+                name: "Sprint".to_string(),
+                applicable_years: crate::configurator::parser::ApplicabilityRules::All,
+                applicable_genders: crate::configurator::parser::ApplicabilityRules::All,
+            }],
+        };
+
+        let plan = crate::configurator::build::build_plan(config.clone());
+        crate::configurator::run::run(plan, &pool).await.unwrap();
+
+        // Get an event
+        let events = Events::all(&pool).await.unwrap();
+        let event = &events[0];
+
+        // Update scores
+        let new_scores = serde_json::json!({
+            "form1": "10",
+            "form2": "8"
+        });
+
+        Events::set_scores(&pool, event.id.clone(), new_scores.clone())
+            .await
+            .unwrap();
+
+        // Verify scores were updated
+        let updated_events = Events::all(&pool).await.unwrap();
+        let updated_event = updated_events.iter().find(|e| e.id == event.id).unwrap();
+
+        assert_eq!(updated_event.scores, new_scores.to_string());
+    }
 }

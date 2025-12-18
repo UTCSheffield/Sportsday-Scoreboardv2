@@ -6,25 +6,13 @@ use actix_web::{middleware as ActixMiddleware, web, App, HttpServer};
 use async_sqlite::PoolBuilder;
 use log::debug;
 
-use crate::{
-    configurator::parser::Configuration,
-    logger::LogCollector,
-    middleware::authentication::{AuthConfig, Authentication},
-    websocket::ChannelsActor,
+use sportsday_scoreboard_v2::{
+    configurator, db, logger, middleware, prometheus, routes, websocket,
 };
 
-mod configurator;
-mod db;
-mod logger;
-mod middleware;
-mod prometheus;
-mod routes;
-mod templates;
-mod utils;
-mod websocket;
-
-#[cfg(test)]
-mod test_harness;
+use logger::LogCollector;
+use middleware::authentication::{AuthConfig, Authentication};
+use websocket::ChannelsActor;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -112,12 +100,12 @@ async fn main() -> std::io::Result<()> {
             .wrap(ActixMiddleware::Logger::default())
             .wrap(middleware::headers::DefaultHtmlContentType)
             .wrap(prometheus::build_prom(pool.clone()))
-            .app_data(web::Data::new(AppState {
+            .app_data(web::Data::new(sportsday_scoreboard_v2::AppState {
                 client: client.clone(),
                 config: config.clone(),
                 pool: pool.clone(),
                 log_collector: log_collector.clone(),
-                oauth_creds: OauthCreds {
+                oauth_creds: sportsday_scoreboard_v2::OauthCreds {
                     client_id: oauth_client_id.clone(),
                     client_secret: oauth_client_secret.clone(),
                 },
@@ -163,17 +151,4 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await?;
     Ok(())
-}
-
-struct AppState {
-    client: reqwest::Client,
-    config: Configuration,
-    log_collector: LogCollector,
-    oauth_creds: OauthCreds,
-    pool: async_sqlite::Pool,
-}
-
-struct OauthCreds {
-    client_id: String,
-    client_secret: String,
 }

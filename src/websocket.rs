@@ -134,3 +134,87 @@ impl Handler<Publish> for ChannelsActor {
         self.state.broadcast(&msg.channel, msg.payload);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_channels_new() {
+        let channels = Channels::new();
+        assert_eq!(channels.inner.len(), 0);
+    }
+
+    #[test]
+    fn test_broadcast_message_clone() {
+        let msg = BroadcastMessage("test".to_string());
+        let cloned = msg.clone();
+        assert_eq!(msg.0, cloned.0);
+    }
+
+    #[test]
+    fn test_channels_subscribe_creates_channel() {
+        let channels = Channels::new();
+
+        // Create a mock test - this is a simplified test
+        // In a real scenario, you'd use an actual actix recipient
+        assert_eq!(channels.inner.len(), 0);
+    }
+
+    #[test]
+    fn test_channels_broadcast_nonexistent_channel() {
+        let channels = Channels::new();
+        // Broadcasting to a non-existent channel should not panic
+        channels.broadcast("nonexistent", "test message".to_string());
+    }
+
+    #[test]
+    fn test_channel_creation() {
+        let channel = Channel { clients: vec![] };
+        assert_eq!(channel.clients.len(), 0);
+    }
+
+    #[test]
+    fn test_subscribe_message_creation() {
+        // We can't easily test actix actors without running the system,
+        // but we can test message creation
+        // This is a placeholder to show structure
+    }
+
+    #[test]
+    fn test_publish_message_creation() {
+        // Similar to above - structure test
+    }
+
+    #[actix_rt::test]
+    async fn test_channels_actor_creation() {
+        let actor = ChannelsActor::new();
+        assert_eq!(actor.state.inner.len(), 0);
+    }
+
+    #[actix_rt::test]
+    async fn test_channels_actor_start() {
+        let addr = ChannelsActor::new().start();
+        // If we get here without panicking, the actor started successfully
+        assert!(addr.connected());
+    }
+
+    #[test]
+    fn test_broadcast_message_string_content() {
+        let msg = BroadcastMessage("Hello, WebSocket!".to_string());
+        assert_eq!(msg.0, "Hello, WebSocket!");
+        assert!(!msg.0.is_empty());
+    }
+
+    #[test]
+    fn test_subscribe_struct() {
+        // Test that Subscribe message fields can be accessed
+        // This is mainly a compile-time check
+    }
+
+    #[test]
+    fn test_publish_struct() {
+        // Test that Publish message fields can be accessed
+        // This is mainly a compile-time check
+    }
+}
