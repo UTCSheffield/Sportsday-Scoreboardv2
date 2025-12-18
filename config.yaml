@@ -15,13 +15,13 @@ forms:
     colour: lightgreen
   - id: e
     name: Ennis
-    colour: rgb(249, 164, 164)
+    colour: rgb(249, 164, 164)lightblue
   - id: s
     name: Sharman
     colour: "#fdfd80"
   - id: t
     name: Turing
-    colour: lightblue
+    colour: rgb(249, 164, 164)
 
 events:
   - id: 60m
