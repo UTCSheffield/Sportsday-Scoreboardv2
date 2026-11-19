@@ -92,4 +92,4 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
       - name: Update container
-        run: tailscale ssh sean@public "systemctl restart docker-sportsdayscoreboardv2.service"
+        run: tailscale ssh root@public "systemctl restart docker-sportsdayscoreboardv2.service"
