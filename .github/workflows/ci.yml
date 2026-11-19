@@ -92,4 +92,4 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
       - name: Update container
-        run: tailscale ssh sean@scipio "cd sportsday-scoreboard-v2 && docker compose down && docker compose up -d --pull always --remove-orphans"
+        run: tailscale ssh sean@public "systemctl restart docker-sportsdayscoreboardv2.service"
